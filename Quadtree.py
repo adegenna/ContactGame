@@ -7,11 +7,12 @@ class QuadTree:
     """Simple QuadTree class"""
 
     # class initialization function
-    def __init__(self, data, mins, maxs, depth, bucket):
+    def __init__(self, data, mins, maxs, values, depth, bucket):
         self.data    = np.asarray(data)
         self.num     = np.shape(data)[0];
         self.bucket  = bucket;
         self.depth   = depth;
+        self.values  = values;
         self.contact = np.zeros(self.num);
         
         # data should be two-dimensional
@@ -35,33 +36,33 @@ class QuadTree:
             ind2 = (data[:, 0] < mids[0])  & (data[:, 1] >= mids[1]);
             ind3 = (data[:, 0] >= mids[0]) & (data[:, 1] < mids[1]);
             ind4 = (data[:, 0] >= mids[0]) & (data[:, 1] >= mids[1]);
-            data_q1 = data[ind1];
-            data_q2 = data[ind2]; 
-            data_q3 = data[ind3];
-            data_q4 = data[ind4];
+            data_q1 = data[ind1]; values1 = values[ind1,:];
+            data_q2 = data[ind2]; values2 = values[ind2,:];
+            data_q3 = data[ind3]; values3 = values[ind3,:];
+            data_q4 = data[ind4]; values4 = values[ind4,:];
             num1 = np.size(ind1);
             num2 = np.size(ind2);
             num3 = np.size(ind3);
             num4 = np.size(ind4);
-            
+
             # recursively build a quad tree on each quadrant which has data
             if ((data_q1.shape[0] > 0) & (num1 > self.bucket)):
                 self.children.append(QuadTree(data_q1,
-                                              [xmin, ymin], [xmid, ymid],
+                                              [xmin, ymin], [xmid, ymid], values1,
                                               depth - 1,self.bucket))
             if ((data_q2.shape[0] > 0) & (num2 > self.bucket)):
                 self.children.append(QuadTree(data_q2,
-                                              [xmin, ymid], [xmid, ymax],
+                                              [xmin, ymid], [xmid, ymax], values2, 
                                               depth - 1,self.bucket))
             if ((data_q3.shape[0] > 0) & (num3 > self.bucket)):
                 self.children.append(QuadTree(data_q3, 
-                                              [xmid, ymin], [xmax, ymid],
+                                              [xmid, ymin], [xmax, ymid], values3,
                                               depth - 1,self.bucket))
             if ((data_q4.shape[0] > 0) & (num4 > self.bucket)):
                 self.children.append(QuadTree(data_q4,
-                                              [xmid, ymid], [xmax, ymax],
+                                              [xmid, ymid], [xmax, ymax], values4,
                                               depth - 1,self.bucket))
-
+                    
     def draw_rectangle(self, ax):
         """Recursively plot a visualization of the quad tree region"""
         if self.num <= self.bucket:
@@ -86,9 +87,18 @@ class QuadTree:
                     break;
         if (flag == True):
             mids = qt.mids;
+            if (mids.ndim == 2):
+                xmid = np.average(mids[:,0]);
+                ymid = np.average(mids[:,1]);
+                vals = np.average(qt.values,0);
+            else:
+                xmid = mids[0];
+                ymid = mids[1];
+                vals = np.average(qt.values,0);
+            data = np.hstack([xmid,ymid,vals]);
         else:
-            mids = [];
-        return mids;
+            data = [];
+        return data;
 
 def draw_grid(ax, xlim, ylim, Nx, Ny, **kwargs):
     """ draw a background grid for the quad tree"""
