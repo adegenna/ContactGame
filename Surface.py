@@ -6,10 +6,14 @@ import Quadtree as QT
 
 class Surface:
     """Class for defining a custom surface"""
-    def __init__(self, xy, uv):
-        self.calculateQuadtree(xy,uv);
+    def __init__(self, xy, uv, R):
+        self.calculateQuadtree(xy);
+        self.uv   = uv;
+        self.dudv = np.array([0.0,0.0]);
+        self.R    = R;
+        self.mass = np.pi*np.power(R,2);
         
-    def calculateQuadtree(self, xy, uv):
+    def calculateQuadtree(self, xy):
         mins      = np.array([np.min(xy[:,0]),np.min(xy[:,1])]);
         maxs      = np.array([np.max(xy[:,0]),np.max(xy[:,1])]);
         samp      = np.shape(xy)[0];
@@ -21,7 +25,6 @@ class Surface:
         nx        = -ty;
         ny        = tx;
         self.xy   = xy;
-        self.uv   = uv;
         self.tang = np.transpose(np.vstack([tx,ty]));
         self.norm = np.transpose(np.vstack([nx,ny]));
         values    = np.hstack([self.tang,self.norm]);
@@ -32,3 +35,9 @@ class Surface:
 
     def set_uv(self,u,v):
         self.uv = np.array([u,v]);
+
+    def increment_dudv(self,du,dv):
+        self.dudv += np.array([du,dv]);
+
+    def clear_dudv(self):
+        self.dudv = np.array([0.0,0.0]);

@@ -2,6 +2,9 @@ import numpy as np
 import Quadtree as QT
 import Surface as Surf
 
+diff = 0.9;   # Global dissipation factor
+GRAV = -9.81; # Gravity
+
 def contact(body1, body2):
     # Function to detect whether there is contact between two bodies
     XY   = np.array([]);
@@ -9,38 +12,97 @@ def contact(body1, body2):
     for i in range(0,body1.qt.num):
         xy1 = body2.qt.search_QT(body1.qt.data[i,0],body1.qt.data[i,1]);
         XY = np.append(XY,xy1);
-
     XY = np.reshape(XY,(np.size(XY)/cols,cols));
     return XY;
 
-def timestep(body, wall, dt):
-    # Function to update body's position based on contact
-    xy = contact(body,wall);
-    diff = 0.8;
-    if (xy.any()):
-        xmean       = np.average(xy[:,0]);
-        ymean       = np.average(xy[:,1]);
-        tx          = np.average(xy[:,2]);
-        ty          = np.average(xy[:,3]);
-        nx          = np.average(xy[:,4]);
-        ny          = np.average(xy[:,5]);
-        u           = body.uv[0];
-        v           = body.uv[1];
-        tvel        = u*tx + v*ty;
-        nvel        = u*nx + v*ny;
-        tvelBounce  = tvel;
-        nvelBounce  = -diff*nvel;
-        uBounce     = tx*tvelBounce + nx*nvelBounce;
-        vBounce     = ty*tvelBounce + ny*nvelBounce;
-        dx          = uBounce*dt;
-        dy          = vBounce*dt;
-        body.set_uv(uBounce,vBounce);
-    else:
-        dx          = body.uv[0]*dt;
-        dy          = body.uv[1]*dt;
-    body.set_xy(body.xy[:,0] + dx, body.xy[:,1] + dy);
-    body.set_uv(body.uv[0],        body.uv[1] -9.81*dt);
-    body.calculateQuadtree(body.xy,body.uv);
-        
+def wallCollision(bodies, wall, dt):
+    # Function to calculate collision between bodies and the wall
+    
+    num = np.size(bodies);
+    for i in range(0,num):    # Index through all bodies
+        body = bodies[i];
+        xy   = contact(body,wall);
+        if (xy.any()):
+            # Calculate average collision point properties
+            xmean       = np.average(xy[:,0]);
+            ymean       = np.average(xy[:,1]);
+            tx          = np.average(xy[:,2]);
+            ty          = np.average(xy[:,3]);
+            nx          = np.average(xy[:,4]);
+            ny          = np.average(xy[:,5]);
+            # Elastic wall collision + wall does not move
+            u           = body.uv[0];
+            v           = body.uv[1];
+            tvel        = u*tx + v*ty;
+            nvel        = u*nx + v*ny;
+            tvelBounce  = tvel;
+            nvelBounce  = -diff*nvel;
+            uBounce     = tx*tvelBounce + nx*nvelBounce;
+            vBounce     = ty*tvelBounce + ny*nvelBounce;
+            du          = uBounce - u;
+            dv          = vBounce - v;
+        else:
+            # No collision
+            du          = 0;
+            dv          = 0;
+        # Update body position/velocity
+        bodies[i].increment_dudv(du,dv);
 
-    return;
+def bodyCollision(bodies, dt):
+    # Function to calculate collision between bodies
+    
+    num = np.size(bodies);
+    for i in range(0,num-1):    # Index through all bodies
+        for j in range(i+1,num):
+            body1 = bodies[i];
+            body2 = bodies[j];
+            xy    = contact(body1,body2);
+            if (xy.any()):
+                # Calculate average collision point properties
+                xmean       = np.average(xy[:,0]);
+                ymean       = np.average(xy[:,1]);
+                tx          = np.average(xy[:,2]);
+                ty          = np.average(xy[:,3]);
+                nx          = np.average(xy[:,4]);
+                ny          = np.average(xy[:,5]);
+                # Elastic collision
+                mass1       = body1.mass;
+                mass2       = body2.mass;
+                v21         = body2.uv - body1.uv;
+                x21         = body2.xycent - body1.xycent;
+                VEL1F       = body1.uv - 2*mass2/(mass1+mass2)*np.inner(v21,x21)/np.power(np.linalg.norm(x21),2.0)*(-x21);
+                VEL2F       = body2.uv - 2*mass1/(mass1+mass2)*np.inner(v21,x21)/np.power(np.linalg.norm(x21),2.0)*(x21);
+
+                tvel        = u*tx + v*ty;
+                nvel        = u*nx + v*ny;
+                tvelBounce  = tvel;
+                nvelBounce  = -diff*nvel;
+                uBounce     = tx*tvelBounce + nx*nvelBounce;
+                vBounce     = ty*tvelBounce + ny*nvelBounce;
+                du          = uBounce - u;
+                dv          = vBounce - v;
+            else:
+                # No collision
+                du          = 0;
+                dv          = 0;
+            # Update body position/velocity
+            bodies[i].increment_dudv(du,dv);
+        
+def forwardEuler(bodies, wall, dt):
+    # Function to update body's position based on contact
+    
+    # Calculate body-wall collisions
+    wallCollision(bodies, wall, dt);
+    # Calculate body-body collisions
+    bodyCollision(bodies, dt);
+    # Update body positions
+    num = np.size(bodies);
+    for i in range(0,num):
+        u  = bodies[i].dudv[0] + bodies[i].uv[0];
+        v  = bodies[i].dudv[1] + bodies[i].uv[1];
+        dx = u*dt;
+        dy = v*dt;
+        bodies[i].set_xy(bodies[i].xy[:,0] + dx , bodies[i].xy[:,1] + dy);
+        bodies[i].set_uv(u                 , v + GRAV*dt);
+        bodies[i].clear_dudv();
+        bodies[i].calculateQuadtree(bodies[i].xy, bodies[i].uv);
