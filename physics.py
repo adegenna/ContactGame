@@ -16,7 +16,7 @@ def contact(body1, body2):
 def timestep(body, wall, dt):
     # Function to update body's position based on contact
     xy = contact(body,wall);
-    diff = 1.0;
+    diff = 0.8;
     if (xy.any()):
         xmean       = np.average(xy[:,0]);
         ymean       = np.average(xy[:,1]);
@@ -28,14 +28,13 @@ def timestep(body, wall, dt):
         v           = body.uv[1];
         tvel        = u*tx + v*ty;
         nvel        = u*nx + v*ny;
-        tvelBounce  = diff*tvel;
+        tvelBounce  = tvel;
         nvelBounce  = -diff*nvel;
         uBounce     = tx*tvelBounce + nx*nvelBounce;
         vBounce     = ty*tvelBounce + ny*nvelBounce;
         dx          = uBounce*dt;
         dy          = vBounce*dt;
         body.set_uv(uBounce,vBounce);
-        print(tvel,nvel)
     else:
         dx          = body.uv[0]*dt;
         dy          = body.uv[1]*dt;

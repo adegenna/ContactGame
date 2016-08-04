@@ -10,34 +10,34 @@ ax   = plt.gca();
 
 # Initialize object
 samp = 1000;
-x    = 0.25*np.cos(np.linspace(-np.pi,np.pi,samp));
-y    = 0.5 + 0.25*np.sin(np.linspace(-np.pi,np.pi,samp));
+x    = 0.0 + 0.1*np.cos(np.linspace(-np.pi,np.pi,samp));
+y    = 0.5 + 0.1*np.sin(np.linspace(-np.pi,np.pi,samp));
 xy   = np.array([x,y]);
 xy   = np.transpose(xy);
-uv   = np.array([1.0,0.0]);
+uv   = np.array([1.0,1.0]);
 surf = Surf.Surface(xy,uv);
 
 # Define wall boundaries
-xw    = np.hstack(np.array([-1*np.ones(samp),np.linspace(-1,1,samp),1*np.ones(samp)]));
-yw    = np.hstack(np.array([np.linspace(1,0,samp),np.zeros(samp),np.linspace(0,1,samp)]));
+#xw    = np.hstack(np.array([-1*np.ones(samp),np.linspace(-1,1,samp),1*np.ones(samp)]));
+#yw    = np.hstack(np.array([np.linspace(1,0,samp),np.zeros(samp),np.linspace(0,1,samp)]));
+xw     = np.linspace(-1,1,2*samp);
+yw     = np.abs(xw);
 xyw   = np.array([xw,yw]);
 xyw   = np.transpose(xyw);
 uvw   = np.array([0.0,0.0]);
 surfw = Surf.Surface(xyw,uvw);
-# surf.qt.draw_rectangle(ax);
-# surfw.qt.draw_rectangle(ax);
-# plt.scatter(x,y,edgecolor='k',facecolor='none');
-# plt.scatter(xw,yw,edgecolor='k',facecolor='none');
+np.savetxt('OUT/WALL.csv',xyw,delimiter=',');
 
 # Physics timestepping
 plt.plot(xw,yw,'k');
 plt.plot(x,y,'k');
-steps = 40;
+steps = 200;
 dt    = 0.01;
 for i in range(0,steps):
-    print(i)
+    print((i+1)*dt)
     physics.timestep(surf,surfw,dt);
-    plt.plot(surf.xy[:,0],surf.xy[:,1],'b');
+    plt.scatter(np.average(surf.xy[:,0]),np.average(surf.xy[:,1]),s=50,c='r');
+    np.savetxt('OUT/T' + str((i+1)*dt) + '.csv',surf.xy,delimiter=',');
 
 # Calculate contact
 # xy1 = contact(surf,surfw);

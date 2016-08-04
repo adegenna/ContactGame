@@ -16,11 +16,10 @@ class Surface:
         tx        = np.diff(xy[:,0]); tx = np.append(tx,tx[samp-2]);
         ty        = np.diff(xy[:,1]); ty = np.append(ty,ty[samp-2]);
         NORM      = np.sqrt(np.power(tx,2) + np.power(ty,2));
-        print(np.shape(NORM));
         tx        = tx/NORM;
         ty        = ty/NORM;
         nx        = -ty;
-        ny        = nx;
+        ny        = tx;
         self.xy   = xy;
         self.uv   = uv;
         self.tang = np.transpose(np.vstack([tx,ty]));
