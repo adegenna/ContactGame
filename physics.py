@@ -2,7 +2,7 @@ import numpy as np
 import Quadtree as QT
 import Surface as Surf
 
-diff = 0.9;   # Global dissipation factor
+diff = 0.7;   # Global dissipation factor
 GRAV = -9.81; # Gravity
 
 def contact(body1, body2):
@@ -36,7 +36,10 @@ def wallCollision(bodies, wall, dt):
             tvel        = u*tx + v*ty;
             nvel        = u*nx + v*ny;
             tvelBounce  = tvel;
-            nvelBounce  = -diff*nvel;
+            if (nvel < 0):
+                nvelBounce  = -diff*nvel;
+            else:
+                nvelBounce  = diff*nvel;
             uBounce     = tx*tvelBounce + nx*nvelBounce;
             vBounce     = ty*tvelBounce + ny*nvelBounce;
             du          = uBounce - u;
@@ -72,22 +75,20 @@ def bodyCollision(bodies, dt):
                 x21         = body2.xycent - body1.xycent;
                 VEL1F       = body1.uv - 2*mass2/(mass1+mass2)*np.inner(v21,x21)/np.power(np.linalg.norm(x21),2.0)*(-x21);
                 VEL2F       = body2.uv - 2*mass1/(mass1+mass2)*np.inner(v21,x21)/np.power(np.linalg.norm(x21),2.0)*(x21);
-
-                tvel        = u*tx + v*ty;
-                nvel        = u*nx + v*ny;
-                tvelBounce  = tvel;
-                nvelBounce  = -diff*nvel;
-                uBounce     = tx*tvelBounce + nx*nvelBounce;
-                vBounce     = ty*tvelBounce + ny*nvelBounce;
-                du          = uBounce - u;
-                dv          = vBounce - v;
+                du1         = VEL1F[0] - body1.uv[0];
+                dv1         = VEL1F[1] - body1.uv[1];
+                du2         = VEL2F[0] - body2.uv[0];
+                dv2         = VEL2F[1] - body2.uv[1];
             else:
                 # No collision
-                du          = 0;
-                dv          = 0;
+                du1         = 0;
+                dv1         = 0;
+                du2         = 0;
+                dv2         = 0;
             # Update body position/velocity
-            bodies[i].increment_dudv(du,dv);
-        
+            bodies[i].increment_dudv(du1,dv1);
+            bodies[j].increment_dudv(du2,dv2);
+            
 def forwardEuler(bodies, wall, dt):
     # Function to update body's position based on contact
     
@@ -104,5 +105,6 @@ def forwardEuler(bodies, wall, dt):
         dy = v*dt;
         bodies[i].set_xy(bodies[i].xy[:,0] + dx , bodies[i].xy[:,1] + dy);
         bodies[i].set_uv(u                 , v + GRAV*dt);
+        bodies[i].calculateXYcent();
         bodies[i].clear_dudv();
-        bodies[i].calculateQuadtree(bodies[i].xy, bodies[i].uv);
+        bodies[i].calculateQuadtree(bodies[i].xy);

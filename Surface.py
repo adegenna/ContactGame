@@ -8,10 +8,11 @@ class Surface:
     """Class for defining a custom surface"""
     def __init__(self, xy, uv, R):
         self.calculateQuadtree(xy);
-        self.uv   = uv;
-        self.dudv = np.array([0.0,0.0]);
-        self.R    = R;
-        self.mass = np.pi*np.power(R,2);
+        self.uv     = uv;
+        self.dudv   = np.array([0.0,0.0]);
+        self.R      = R;
+        self.mass   = np.pi*np.power(R,2);
+        self.xycent = np.average(xy,0);
         
     def calculateQuadtree(self, xy):
         mins      = np.array([np.min(xy[:,0]),np.min(xy[:,1])]);
@@ -28,7 +29,7 @@ class Surface:
         self.tang = np.transpose(np.vstack([tx,ty]));
         self.norm = np.transpose(np.vstack([nx,ny]));
         values    = np.hstack([self.tang,self.norm]);
-        self.qt = QT.QuadTree(xy,mins,maxs,values,depth=10,bucket=5);
+        self.qt   = QT.QuadTree(xy,mins,maxs,values,depth=10,bucket=2);
 
     def set_xy(self,x,y):
         self.xy = np.transpose(np.array([x,y]));
@@ -41,3 +42,6 @@ class Surface:
 
     def clear_dudv(self):
         self.dudv = np.array([0.0,0.0]);
+
+    def calculateXYcent(self):
+        self.xycent = np.average(self.xy,0);
