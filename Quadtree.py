@@ -100,6 +100,29 @@ class QuadTree:
             data = [];
         return data;
 
+    
+    def translateChildren(self,dx,dy):
+        # Function to translate quadtree child nodes via recursion
+        for child in self.children:
+            child.data += np.array([dx,dy]);
+            child.mins += np.array([dx,dy]);
+            child.maxs += np.array([dx,dy]);
+            child.mids += np.array([dx,dy]);
+            child.translateChildren(dx,dy);
+            
+    def translateQuadtree(self,dx,dy):
+        # Function to translate quadtree
+
+        # Initialization: translate mother node
+        qt       = self;
+        qt.data += np.array([dx,dy]);
+        qt.mins += np.array([dx,dy]);
+        qt.maxs += np.array([dx,dy]);
+        qt.mids += np.array([dx,dy]);
+        # Recursive calls to translateChildren
+        qt.translateChildren(dx,dy);
+
+
 def draw_grid(ax, xlim, ylim, Nx, Ny, **kwargs):
     """ draw a background grid for the quad tree"""
     for x in np.linspace(xlim[0], xlim[1], Nx):

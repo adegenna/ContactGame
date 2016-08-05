@@ -73,12 +73,13 @@ def bodyCollision(bodies, dt):
                 mass2       = body2.mass;
                 v21         = body2.uv - body1.uv;
                 x21         = body2.xycent - body1.xycent;
+                x21         = (x21/np.linalg.norm(x21))*(body1.R + body2.R); # Rescale x21 to fix glitching behavior
                 VEL1F       = body1.uv - 2*mass2/(mass1+mass2)*np.inner(v21,x21)/np.power(np.linalg.norm(x21),2.0)*(-x21);
                 VEL2F       = body2.uv - 2*mass1/(mass1+mass2)*np.inner(v21,x21)/np.power(np.linalg.norm(x21),2.0)*(x21);
-                du1         = VEL1F[0] - body1.uv[0];
-                dv1         = VEL1F[1] - body1.uv[1];
-                du2         = VEL2F[0] - body2.uv[0];
-                dv2         = VEL2F[1] - body2.uv[1];
+                du1         = diff*(VEL1F[0] - body1.uv[0]);
+                dv1         = diff*(VEL1F[1] - body1.uv[1]);
+                du2         = diff*(VEL2F[0] - body2.uv[0]);
+                dv2         = diff*(VEL2F[1] - body2.uv[1]);
             else:
                 # No collision
                 du1         = 0;
@@ -107,4 +108,5 @@ def forwardEuler(bodies, wall, dt):
         bodies[i].set_uv(u                 , v + GRAV*dt);
         bodies[i].calculateXYcent();
         bodies[i].clear_dudv();
-        bodies[i].calculateQuadtree(bodies[i].xy);
+        bodies[i].translateQuadtree(dx,dy);
+        #bodies[i].calculateQuadtree(bodies[i].xy);

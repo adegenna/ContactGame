@@ -30,6 +30,9 @@ class Surface:
         self.norm = np.transpose(np.vstack([nx,ny]));
         values    = np.hstack([self.tang,self.norm]);
         self.qt   = QT.QuadTree(xy,mins,maxs,values,depth=10,bucket=2);
+        
+    def translateQuadtree(self,dx,dy):
+        self.qt.translateQuadtree(dx,dy);
 
     def set_xy(self,x,y):
         self.xy = np.transpose(np.array([x,y]));

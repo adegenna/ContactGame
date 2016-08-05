@@ -54,18 +54,11 @@ for i in range(0,steps):
     print((i+1)*dt)
     physics.forwardEuler(bodies,wall,dt);
     for j in range(0,np.size(bodies)):
-        plt.scatter(bodies[j].xycent[0], bodies[j].xycent[1], s=50, c='b');
+        #plt.scatter(bodies[j].xycent[0], bodies[j].xycent[1], s=50, c='b');
         np.savetxt('OUT/T' + str((i+1)*dt) + '_' + str(j) + '.csv',bodies[j].xy,delimiter=',');
 
-# Calculate contact
-# xy1 = contact(surf,wall);
+#plt.xlim([-1.2,1.2]);
+#plt.ylim([-0.2,1.2]);
+#ax.set_aspect('equal');
 
-# if (xy1 != []):
-#     print np.shape(xy1)
-#     for i in range(0,np.shape(xy1)[0]):
-#         plt.scatter(xy1[i,0],xy1[i,1],s=100,c='b');
-plt.xlim([-1.2,1.2]);
-plt.ylim([-0.2,1.2]);
-ax.set_aspect('equal');
-
-plt.show()
+#plt.show()

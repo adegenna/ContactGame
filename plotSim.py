@@ -10,9 +10,9 @@ import time as TIME
 
 plt.ion()
 
-steps = 500;
+steps = 220;
 dt    = 0.01;
-num   = 3;
+num   = 11;
 
 xyw   = np.genfromtxt('OUT/WALL.csv',delimiter=',');
 plt.plot(xyw[:,0],xyw[:,1],'k');
