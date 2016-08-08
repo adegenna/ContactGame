@@ -61,7 +61,7 @@ Y0      = bodies[-1].xycent[1] + 4*R*1.1;
 x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
 y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
 xy      = np.transpose(np.array([x,y]));
-uv      = np.array([0.0,0.0]);
+uv      = np.array([0.0,-4.0]);
 surf    = Surf.Surface(xy,uv,R);
 bodies.append(surf);
 
@@ -78,11 +78,11 @@ np.savetxt('OUT/WALL.csv',xyw,delimiter=',');
 # ****************************************************
 
 # Physics timestepping
-steps = 100;
-dt    = 0.01;
+steps = 1000;
+dt    = 0.001;
 for i in range(0,steps):
     print(str(i*dt) + '/' + str(steps*dt));
-    physics.forwardEuler(bodies,wall,dt);
+    physics.verletIntegration(bodies,wall,dt);
     for j in range(0,np.size(bodies)):
         np.savetxt('OUT/T' + str((i+1)*dt) + '_' + str(j) + '.csv',bodies[j].xy,delimiter=',');
 

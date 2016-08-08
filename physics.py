@@ -74,8 +74,10 @@ def bodyCollision(bodies, dt):
                 v21         = body2.uv - body1.uv;
                 x21         = body2.xycent - body1.xycent;
                 x21         = (x21/np.linalg.norm(x21))*(body1.R + body2.R); # Rescale x21 to fix glitching behavior
-                VEL1F       = body1.uv - 2*mass2/(mass1+mass2)*np.inner(v21,x21)/np.power(np.linalg.norm(x21),2.0)*(-x21);
-                VEL2F       = body2.uv - 2*mass1/(mass1+mass2)*np.inner(v21,x21)/np.power(np.linalg.norm(x21),2.0)*(x21);
+                J1          = -2*mass2/(mass1+mass2)*np.inner(v21,x21)/np.power(np.linalg.norm(x21),2.0)*(-x21);
+                J2          = -2*mass1/(mass1+mass2)*np.inner(v21,x21)/np.power(np.linalg.norm(x21),2.0)*(x21);
+                VEL1F       = body1.uv + J1;
+                VEL2F       = body2.uv + J2;
                 du1         = diff*(VEL1F[0] - body1.uv[0]);
                 dv1         = diff*(VEL1F[1] - body1.uv[1]);
                 du2         = diff*(VEL2F[0] - body2.uv[0]);
@@ -86,9 +88,13 @@ def bodyCollision(bodies, dt):
                 dv1         = 0;
                 du2         = 0;
                 dv2         = 0;
+                J1          = np.array([0,0]);
+                J2          = np.array([0,0]);
             # Update body position/velocity
             bodies[i].increment_dudv(du1,dv1);
             bodies[j].increment_dudv(du2,dv2);
+            bodies[i].set_J(J1);
+            bodies[j].set_J(J2);
             
 def forwardEuler(bodies, wall, dt):
     # Function to update body's position based on contact
@@ -106,6 +112,28 @@ def forwardEuler(bodies, wall, dt):
         dy = v*dt;
         bodies[i].set_xy(bodies[i].xy[:,0] + dx , bodies[i].xy[:,1] + dy);
         bodies[i].set_uv(u                 , v + GRAV*dt);
+        bodies[i].calculateXYcent();
+        bodies[i].clear_dudv();
+        bodies[i].translateQuadtree(dx,dy);
+        #bodies[i].calculateQuadtree(bodies[i].xy);
+
+def verletIntegration(bodies, wall, dt):
+    # Verlet integration scheme
+
+    # Calculate body-wall collisions
+    wallCollision(bodies, wall, dt);
+    # Calculate body-body collisions
+    bodyCollision(bodies, dt);
+    # Update body positions
+    num = np.size(bodies);
+    for i in range(0,num):
+        J              = bodies[i].J;
+        a_tTimesDT     = GRAV*np.array([0,1])*dt + J;
+        xy_tPlusDT     = 2*bodies[i].xy - bodies[i].xyPrev + np.tile(a_tTimesDT*dt,[num,1]);
+        bodies[i].set_xyPrev(bodies[i].xy[:,0],bodies[i].xy[:,1]);
+        bodies[i].set_xy(xy_tPlusDT[:,0],xy_tPlusDT[:,1]);
+        dx             = bodies[i].xy[:,0] - bodies[i].xyPrev[:,0];
+        dy             = bodies[i].xy[:,1] - bodies[i].xyPrev[:,1];
         bodies[i].calculateXYcent();
         bodies[i].clear_dudv();
         bodies[i].translateQuadtree(dx,dy);

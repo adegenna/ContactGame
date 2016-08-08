@@ -1,3 +1,4 @@
+
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm
@@ -7,12 +8,15 @@ import Quadtree as QT
 class Surface:
     """Class for defining a custom surface"""
     def __init__(self, xy, uv, R):
+        num         = np.shape(xy)[0];
         self.calculateQuadtree(xy);
         self.uv     = uv;
         self.dudv   = np.array([0.0,0.0]);
         self.R      = R;
         self.mass   = np.pi*np.power(R,2);
         self.xycent = np.average(xy,0);
+        self.J      = np.array([0.0,0.0]);
+        self.xyPrev = np.zeros([num,2]);
         
     def calculateQuadtree(self, xy):
         mins      = np.array([np.min(xy[:,0]),np.min(xy[:,1])]);
@@ -37,6 +41,9 @@ class Surface:
     def set_xy(self,x,y):
         self.xy = np.transpose(np.array([x,y]));
 
+    def set_xyPrev(self,x,y):
+        self.xyPrev = np.transpose(np.array([x,y]));
+        
     def set_uv(self,u,v):
         self.uv = np.array([u,v]);
 
@@ -48,3 +55,7 @@ class Surface:
 
     def calculateXYcent(self):
         self.xycent = np.average(self.xy,0);
+
+    def set_J(self,J):
+        # This is technically J/m
+        self.J = J;
