@@ -10,9 +10,9 @@ import time as TIME
 
 plt.ion()
 
-steps = 220;
+steps = 1000;
 dt    = 0.01;
-num   = 11;
+num   = 10;
 
 xyw   = np.genfromtxt('OUT/WALL.csv',delimiter=',');
 plt.plot(xyw[:,0],xyw[:,1],'k');
@@ -22,11 +22,14 @@ for i in range(0,steps):
     plt.gca().clear();
     time = (i+1)*dt;
     for j in range(0,num):
-        xy   = np.genfromtxt('OUT/T' + str((i+1)*dt) + '_' + str(j) + '.csv',delimiter=',');
-        plt.plot(xy[:,0],xy[:,1],'b');
+        try:
+            xy   = np.genfromtxt('OUT/T' + str((i+1)*dt) + '_' + str(j) + '.csv',delimiter=',');
+            plt.plot(xy[:,0],xy[:,1],'b');
+        except:
+            pass;
     plt.plot(xyw[:,0],xyw[:,1],'k');
-    plt.xlim([-1.2,1.2]);
-    plt.ylim([-0.2,1.2]);
+    plt.xlim([-0.4,0.4]);
+    plt.ylim([-0.1,0.5])
     plt.gca().set_aspect('equal');
     plt.draw();
     plt.show();

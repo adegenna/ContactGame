@@ -12,7 +12,7 @@ import physics
 
 # Generate cone of close-packed, equal sized balls
 # Generate first ball at bottom of cone
-levels  = 4;
+levels  = 3;
 samp    = 1000;
 R       = 0.05;
 X0      = 0;
@@ -56,7 +56,7 @@ for i in range(0,levels-1):
         bodies.append(surf);
 
 # Generate a single ball above cone
-X0      = 0.0;
+X0      = 0.1;
 Y0      = bodies[-1].xycent[1] + 4*R*1.1;
 x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
 y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));

@@ -7,7 +7,7 @@ import Quadtree as QT
 
 class Surface:
     """Class for defining a custom surface"""
-    def __init__(self, xy, uv, R):
+    def __init__(self, xy, uv, R, dt):
         num         = np.shape(xy)[0];
         self.calculateQuadtree(xy);
         self.uv     = uv;
@@ -16,7 +16,8 @@ class Surface:
         self.mass   = np.pi*np.power(R,2);
         self.xycent = np.average(xy,0);
         self.J      = np.array([0.0,0.0]);
-        self.xyPrev = np.zeros([num,2]);
+        self.xyPrev = xy - uv*dt;
+        self.bodyContacts = np.empty(0);
         
     def calculateQuadtree(self, xy):
         mins      = np.array([np.min(xy[:,0]),np.min(xy[:,1])]);
@@ -59,3 +60,17 @@ class Surface:
     def set_J(self,J):
         # This is technically J/m
         self.J = J;
+
+    def increment_J(self,J):
+        # This is technically J/m
+        self.J += J;
+    
+    def clear_J(self):
+        # This is technically J/m
+        self.J = np.array([0.0,0.0]);
+
+    def append_contacts(self,i):
+        self.bodyContacts = np.append(self.bodyContacts,i);
+
+    def clear_contacts(self):
+        self.bodyContacts = np.empty(0);
