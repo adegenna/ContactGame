@@ -5,15 +5,29 @@ import Surface as Surf
 diff = 0.7;   # Global dissipation factor
 GRAV = -9.81; # Gravity
 
-def contact(body1, body2):
+def contact(body1, body2, CONT, I, J):
     # Function to detect whether there is contact between two bodies
     XY   = np.array([]);
     cols = np.shape(body1.qt.values)[1] + np.shape(body1.qt.data)[1];
     for i in range(0,body1.qt.num):
         xy1 = body2.qt.search_QT(body1.qt.data[i,0],body1.qt.data[i,1]);
-        XY = np.append(XY,xy1);
-    XY = np.reshape(XY,(np.size(XY)/cols,cols));
-    return XY;
+        XY  = np.append(XY,xy1);
+    # Rule out collisions with positive normal velocity
+    if XY.any():
+        XY = np.reshape(XY,(np.size(XY)/cols,cols));
+        tx          = np.average(XY[:,2]);
+        ty          = np.average(XY[:,3]);
+        nx          = np.average(XY[:,4]);
+        ny          = np.average(XY[:,5]);
+        uv2         = body2.uv;
+        tvel        = uv2[0]*tx + uv2[1]*ty;
+        nvel        = uv2[0]*nx + uv2[1]*ny;
+        # Remember contacting bodies
+        if (nvel <=0):
+            CONT[I,J] = 1;
+            CONT[J,I] = 1;
+        print(CONT)
+    return XY,CONT;
 
 def wallCollision(bodies, wall, dt):
     # Function to calculate collision between bodies and the wall
@@ -65,7 +79,6 @@ def wallCollision(bodies, wall, dt):
             # Apply impulse from wall condition to bodies colliding simultaneously with J_i
             numContact = np.size(bodies[i].bodyContacts);
             for k in range(0,numContact):
-                print("COND")
                 ind        = int(bodies[i].bodyContacts[k]);
                 J0         = bodies[ind].J;
                 xij        = (bodies[i].xycent - bodies[ind].xycent);
@@ -89,52 +102,15 @@ def wallCollision(bodies, wall, dt):
 def bodyCollision(bodies, dt):
     # Function to calculate collision between bodies
     
-    num = np.size(bodies);
-    for i in range(0,num-1):    # Index through all bodies
+    num  = np.shape(bodies)[0];
+    # Calculate all contacts between all bodies
+    CONT = np.zeros([num,num]);
+    for i in range(0,num-1):
         for j in range(i+1,num):
-            body1 = bodies[i];
-            body2 = bodies[j];
-            xy    = contact(body1,body2);
-            # Calculate average collision point properties
-            xmean       = np.average(xy[:,0]);
-            ymean       = np.average(xy[:,1]);
-            tx          = np.average(xy[:,2]);
-            ty          = np.average(xy[:,3]);
-            nx          = np.average(xy[:,4]);
-            ny          = np.average(xy[:,5]);
-            uv2         = body2.uv;
-            tvel        = uv2[0]*tx + uv2[1]*ty;
-            nvel        = uv2[0]*nx + uv2[1]*ny;
-            if ( (xy.any()) & (nvel < 0.0) ) :
-                # Elastic collision
-                mass1       = body1.mass;
-                mass2       = body2.mass;
-                v21         = body2.uv - body1.uv;
-                x21         = body2.xycent - body1.xycent;
-                x21         = (x21/np.linalg.norm(x21))*(body1.R + body2.R); # Rescale x21 to fix glitching behavior
-                J1          = diff*(-2*mass2/(mass1+mass2)*np.inner(v21,x21)/np.power(np.linalg.norm(x21),2.0)*(-x21));
-                J2          = diff*(-2*mass1/(mass1+mass2)*np.inner(v21,x21)/np.power(np.linalg.norm(x21),2.0)*(x21));
-                VEL1F       = body1.uv + J1;
-                VEL2F       = body2.uv + J2;
-                du1         = diff*(VEL1F[0] - body1.uv[0]);
-                dv1         = diff*(VEL1F[1] - body1.uv[1]);
-                du2         = diff*(VEL2F[0] - body2.uv[0]);
-                dv2         = diff*(VEL2F[1] - body2.uv[1]);
-                bodies[i].append_contacts(j);
-                bodies[j].append_contacts(i);
-            else:
-                # No collision
-                du1         = 0;
-                dv1         = 0;
-                du2         = 0;
-                dv2         = 0;
-                J1          = np.array([0,0]);
-                J2          = np.array([0,0]);
-            # Update body position/velocity
-            bodies[i].increment_dudv(du1,dv1);
-            bodies[j].increment_dudv(du2,dv2);
-            bodies[i].increment_J(J1);
-            bodies[j].increment_J(J2);
+            body1   = bodies[i];
+            body2   = bodies[j];
+            xy,CONT = contact(body1,body2,CONT,i,j);
+    return CONT;
             
 def forwardEuler(bodies, wall, dt):
     # Function to update body's position based on contact
@@ -185,3 +161,103 @@ def verletIntegration(bodies, wall, dt):
         bodies[i].translateQuadtree(dx,dy);
         bodies[i].clear_contacts();
         #bodies[i].calculateQuadtree(bodies[i].xy);
+
+
+
+# Jacobian calculation
+def jacobian(x,E,bodies,num):
+    # Calculate initial/final energies
+    E0 = 0.0; Ef = 0.0;
+    M = np.zeros(num);
+    X = np.zeros([2,num]);
+    V = np.zeros([2,num]);
+    for i in range(0,num):
+        M[i]   = bodies[i].mass;
+        X[:,i] = bodies[i].xycent;
+        V[:,i] = bodies[i].uv;
+    for i in range(0,num):
+        E0 += 0.5*M[i]*(np.power(V[0,i],2) + np.power(V[1,i],2));
+        Ef += 0.5*M[i]*(np.power(x[2*i],2) + np.power(x[2*i+1],2));
+    # Construct mass matrix
+    MASS = np.zeros([2*num,2*num]);
+    for i in range(0,num):
+        MASS[2*i,2*i]     = M[i];
+        MASS[2*i+1,2*i+1] = M[i];
+    # Construct impulse line-of-action matrix
+    rows = 2*num; cols = num*(num-1)/2;
+    CONT = np.zeros([rows,cols]);
+    count = 0;
+    for i in range(0,num):
+        for j in range(i+1,num):
+            K = E[i,j];
+            e = np.squeeze((X[:,i]-X[:,j])/np.linalg.norm(X[:,i]-X[:,j]));
+            CONT[2*i:2*i+2,count] = K*e;
+            CONT[2*j:2*j+2,count] = -K*e;
+            count += 1;
+    CONT = CONT[:,~(CONT==0).all(0)]; # Remove zero columns from line-of-action matrix  
+    # Construct matrix derivative of energy equation
+    ENERGY = np.zeros(2*num);
+    for i in range(0,num):
+        ENERGY[2*i]   = M[i]*x[2*i];
+        ENERGY[2*i+1] = M[i]*x[2*i+1];
+    DF1 = np.concatenate([MASS,CONT],axis=1);
+    DF2 = np.concatenate([ENERGY,np.zeros(np.shape(CONT)[1])]);
+    DF  = np.vstack([DF1,DF2]);
+    # Calculate function
+    f = np.zeros(2*num+1);
+    for i in range(0,num):
+        f[2*i]   = M[i]*x[2*i]   - M[i]*V[0,i] + np.dot(CONT[2*i,:]  , x[2*num:]);
+        f[2*i+1] = M[i]*x[2*i+1] - M[i]*V[1,i] + np.dot(CONT[2*i+1,:], x[2*num:]);
+    f[-1] = Ef - E0;
+    # Calculate DJ
+    DJ   = np.dot(np.transpose(DF),f);
+    fval = np.dot(np.transpose(f),f);
+    return DJ,fval;
+
+
+
+def forwardEuler_V2(bodies,dt):
+    # Function to update body's position based on contact
+
+    num      = np.size(bodies);
+    # Calculate body collision matrix
+    CONT     = bodyCollision(bodies, dt);
+    # Solve simultaneous collision physics
+    steps    = 2000;
+    eps      = 0.01;
+    contacts = np.sum(np.triu(CONT,1));
+    if (contacts > 0):
+        x        = np.zeros(2*num + contacts);
+        for i in range(0,num):
+            x[2*i]   = -bodies[i].uv[0];
+            x[2*i+1] = -bodies[i].uv[1];
+        for i in range(0,steps):
+            DF,f = jacobian(x,CONT,bodies,num);    
+            x += -eps*DF;
+        # Update body velocities, positions
+        for i in range(0,num):
+            uv = np.array([x[2*i] , x[2*i+1]]);
+            dx = uv[0]*dt;
+            dy = uv[1]*dt;
+            bodies[i].set_xy(bodies[i].xy[:,0] + dx , bodies[i].xy[:,1] + dy);
+            bodies[i].set_uv(uv[0] , uv[1]);
+            bodies[i].calculateXYcent();
+            bodies[i].clear_dudv();
+            bodies[i].translateQuadtree(dx,dy);
+            #bodies[i].calculateQuadtree(bodies[i].xy);
+    else:
+        for i in range(0,num):
+            dx = bodies[i].uv[0]*dt;
+            dy = bodies[i].uv[1]*dt;
+            bodies[i].set_xy(bodies[i].xy[:,0] + dx , bodies[i].xy[:,1] + dy);
+            bodies[i].calculateXYcent();
+            bodies[i].clear_dudv();
+            bodies[i].translateQuadtree(dx,dy);
+            #bodies[i].calculateQuadtree(bodies[i].xy);
+
+    
+            
+
+
+
+        

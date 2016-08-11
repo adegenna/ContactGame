@@ -12,8 +12,8 @@ x4  = np.array([-0.5, -np.sqrt(3.0)*0.5]);
 m1  = 1.0;   m2  = 1.0;    m3 = 1.0;  m4 = 1.0;
 v1x = 0.0;   v1y = 0.0;    v1 = np.array([v1x,v1y]);
 v2x = 0.0;   v2y = -2.0;   v2 = np.array([v2x,v2y]);
-v3x = 0.0;   v3y = 0.0;   v3 = np.array([v3x,v3y]);
-v4x = 0.0;   v4y = 0.0;   v4 = np.array([v4x,v4y]);
+v3x = 0.0;   v3y = 0.0;    v3 = np.array([v3x,v3y]);
+v4x = 0.0;   v4y = 0.0;    v4 = np.array([v4x,v4y]);
 
 # Jacobian calculation
 def jacobian(x,X,V,E,M,num):
