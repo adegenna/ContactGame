@@ -1,6 +1,9 @@
 import numpy as np
 import Quadtree as QT
 import Surface as Surf
+import matplotlib.pyplot as plt
+
+np.set_printoptions(linewidth=132)
 
 diff = 0.7;   # Global dissipation factor
 GRAV = -9.81; # Gravity
@@ -23,10 +26,9 @@ def contact(body1, body2, CONT, I, J):
         tvel        = uv2[0]*tx + uv2[1]*ty;
         nvel        = uv2[0]*nx + uv2[1]*ny;
         # Remember contacting bodies
-        if (nvel <=0):
+        if (nvel <= 0):
             CONT[I,J] = 1;
             CONT[J,I] = 1;
-        print(CONT)
     return XY,CONT;
 
 def wallCollision(bodies, wall, dt):
@@ -194,7 +196,12 @@ def jacobian(x,E,bodies,num):
             CONT[2*i:2*i+2,count] = K*e;
             CONT[2*j:2*j+2,count] = -K*e;
             count += 1;
-    CONT = CONT[:,~(CONT==0).all(0)]; # Remove zero columns from line-of-action matrix  
+    CONT = CONT[:,~(CONT==0).all(0)]; # Remove zero columns from line-of-action matrix (bodies not in contact)
+    # Rule out forces that are (1) between 2 bodies at rest AND (2) orthogonal to any colliding body velocity vectors
+    for i in range(0,num):
+        vel = np.linalg.norm(V[:,i]);
+        if (vel < 1.0e-15):
+            
     # Construct matrix derivative of energy equation
     ENERGY = np.zeros(2*num);
     for i in range(0,num):
@@ -212,6 +219,7 @@ def jacobian(x,E,bodies,num):
     # Calculate DJ
     DJ   = np.dot(np.transpose(DF),f);
     fval = np.dot(np.transpose(f),f);
+    #print(DJ)
     return DJ,fval;
 
 
@@ -223,17 +231,35 @@ def forwardEuler_V2(bodies,dt):
     # Calculate body collision matrix
     CONT     = bodyCollision(bodies, dt);
     # Solve simultaneous collision physics
-    steps    = 2000;
-    eps      = 0.01;
-    contacts = np.sum(np.triu(CONT,1));
+    steps    = 100000;
+    eps      = 0.1;
+    contacts = int(np.sum(np.triu(CONT,1)));
     if (contacts > 0):
+        # Set up collision calculation
         x        = np.zeros(2*num + contacts);
-        for i in range(0,num):
-            x[2*i]   = -bodies[i].uv[0];
-            x[2*i+1] = -bodies[i].uv[1];
-        for i in range(0,steps):
-            DF,f = jacobian(x,CONT,bodies,num);    
-            x += -eps*DF;
+        I,J      = CONT.nonzero();
+        bodInd   = np.unique(np.array([I,J]));
+        # Check velocities of colliding bodies
+        flag = True;
+        for i in range(0,contacts):
+            flag = flag & np.all(bodies[bodInd[i]].uv==0);
+        if (flag == False):
+            for i in range(0,num):
+                x[2*i]   = -bodies[i].uv[0];
+                x[2*i+1] = -bodies[i].uv[1];
+            for i in range(0,int(contacts)):
+                x[2*I[i]]   = bodies[J[i]].uv[0];
+                x[2*I[i]+1] = bodies[J[i]].uv[1];
+                x[2*J[i]]   = bodies[I[i]].uv[0];
+                x[2*J[i]+1] = bodies[I[i]].uv[1];
+            for i in range(0,steps):
+                DF,f = jacobian(x,CONT,bodies,num);
+                x   += -eps*DF;
+            print(x)
+        else:
+            for i in range(0,num):
+                x[2*i]   = bodies[i].uv[0];
+                x[2*i+1] = bodies[i].uv[1];
         # Update body velocities, positions
         for i in range(0,num):
             uv = np.array([x[2*i] , x[2*i+1]]);

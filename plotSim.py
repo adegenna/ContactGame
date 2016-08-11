@@ -28,9 +28,9 @@ for i in range(0,steps):
         except:
             pass;
     #plt.plot(xyw[:,0],xyw[:,1],'k');
-    plt.xlim([-1.0,1.0]);
-    plt.ylim([-1.0,1.0])
+    plt.xlim([-0.3,0.3]);
+    plt.ylim([-0.3,0.3])
     plt.gca().set_aspect('equal');
     plt.draw();
     plt.show();
-    #TIME.sleep(0.1);
+    TIME.sleep(0.5);

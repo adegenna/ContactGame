@@ -47,6 +47,7 @@ def jacobian(x,X,V,E,M,num):
     DF1 = np.concatenate([MASS,CONT],axis=1);
     DF2 = np.concatenate([ENERGY,np.zeros(np.shape(CONT)[1])]);
     DF  = np.vstack([DF1,DF2]);
+    print(DF)
     # Calculate function
     f = np.zeros(2*num+1);
     for i in range(0,num):
@@ -61,7 +62,7 @@ def jacobian(x,X,V,E,M,num):
 
 # Simulation
 num   = 4;
-steps = 2000;
+steps = 1;
 eps   = 0.01;
 x = np.zeros(11);
 #x = np.array([-v1x,-v1y,-v2x,-v2y,-v3x,-v3y,-v4x,-v4y,0,0,0]);
@@ -74,11 +75,12 @@ VELTOT = 0;
 for j in range(0,num):
     VELTOT += np.linalg.norm(V[:,j]);
 for i in range(0,num):
-    x[2*i]   = -V[0,i]*4*np.linalg.norm(V[:,i])/VELTOT;
-    x[2*i+1] = -V[1,i]*4*np.linalg.norm(V[:,i])/VELTOT;
+    x[2*i]   = -V[0,i]#*4*np.linalg.norm(V[:,i])/VELTOT;
+    x[2*i+1] = -V[1,i]#*4*np.linalg.norm(V[:,i])/VELTOT;
 x[2*num:] = 0;
+print(x)
 for i in range(0,steps):
-    print(i+1);
+    #print(i+1);
     DF,f = jacobian(x,X,V,E,M,num);
     x += -eps*DF;
     #plt.scatter(i,f,c='b');

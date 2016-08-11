@@ -25,19 +25,21 @@ uv1     = np.array([0.0,0.0]);
 surf1   = Surf.Surface(xy1,uv1,R,dt);
 bodies  = [surf1];
 
+sepR    = 0.999;
+
 for i in range(0,levels-1):
     # Generate balls left and right of leftmost ball
     ind     = (i)*(i+1)/2;
-    X0      = bodies[ind].xycent[0] - R*1.1;
-    Y0      = bodies[ind].xycent[1] + np.sqrt(3)*R*1.1;
+    X0      = bodies[ind].xycent[0] - R*sepR;
+    Y0      = bodies[ind].xycent[1] + np.sqrt(3)*R*sepR;
     x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
     y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
     xy      = np.transpose(np.array([x,y]));
     uv      = np.array([0.0,0.0]);
     surf    = Surf.Surface(xy,uv,R,dt);
     bodies.append(surf);
-    X0      = bodies[ind].xycent[0] + R*1.1;
-    Y0      = bodies[ind].xycent[1] + np.sqrt(3)*R*1.1;
+    X0      = bodies[ind].xycent[0] + R*sepR;
+    Y0      = bodies[ind].xycent[1] + np.sqrt(3)*R*sepR;
     x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
     y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
     xy      = np.transpose(np.array([x,y]));
@@ -47,8 +49,8 @@ for i in range(0,levels-1):
     # Generate remainder of triangle
     for j in range(0,i):
         ind += 1;
-        X0      = bodies[ind].xycent[0] + R*1.1;
-        Y0      = bodies[ind].xycent[1] + np.sqrt(3)*R*1.1;
+        X0      = bodies[ind].xycent[0] + R*sepR;
+        Y0      = bodies[ind].xycent[1] + np.sqrt(3)*R*sepR;
         x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
         y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
         xy      = np.transpose(np.array([x,y]));
@@ -57,12 +59,12 @@ for i in range(0,levels-1):
         bodies.append(surf);
 
 # Generate a single ball above cone
-X0      = 0.1;
-Y0      = bodies[-1].xycent[1] + 4*R*1.1;
+X0      = 0.0;
+Y0      = bodies[-1].xycent[1] - 4*R*1.1;
 x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
 y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
 xy      = np.transpose(np.array([x,y]));
-uv      = np.array([0.0,-4.0]);
+uv      = np.array([0.0,4.0]);
 surf    = Surf.Surface(xy,uv,R,dt);
 bodies.append(surf);
 
