@@ -10,10 +10,10 @@ import physics
 # GEOMETRY
 # ****************************************************
 
-dt    = 0.001;
+dt    = 0.1e-3;
 # Generate cone of close-packed, equal sized balls
 # Generate first ball at bottom of cone
-levels  = 2;
+levels  = 4;
 samp    = 1000;
 R       = 0.05;
 X0      = 0;
@@ -25,7 +25,7 @@ uv1     = np.array([0.0,0.0]);
 surf1   = Surf.Surface(xy1,uv1,R,dt);
 bodies  = [surf1];
 
-sepR    = 0.999;
+sepR    = 1.01;
 
 for i in range(0,levels-1):
     # Generate balls left and right of leftmost ball
@@ -55,12 +55,12 @@ for i in range(0,levels-1):
         y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
         xy      = np.transpose(np.array([x,y]));
         uv      = np.array([0.0,0.0]);
-        surf    = Surf.Surface(xy,uv,R);
+        surf    = Surf.Surface(xy,uv,R,dt);
         bodies.append(surf);
 
 # Generate a single ball above cone
 X0      = 0.0;
-Y0      = bodies[-1].xycent[1] - 4*R*1.1;
+Y0      = bodies[-1].xycent[1] - 8*R*1.003;
 x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
 y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
 xy      = np.transpose(np.array([x,y]));
@@ -84,7 +84,7 @@ bodies.append(surf);
 steps = 1000;
 for i in range(0,steps):
     print(str(i*dt) + '/' + str(steps*dt));
-    physics.forwardEuler_V2(bodies,dt);
+    physics.potentialMethod(bodies,dt);
     for j in range(0,np.size(bodies)):
         np.savetxt('OUT/T' + str((i+1)*dt) + '_' + str(j) + '.csv',bodies[j].xy,delimiter=',');
 

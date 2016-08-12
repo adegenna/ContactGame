@@ -10,8 +10,8 @@ import time as TIME
 
 plt.ion()
 
-steps = 1000;
-dt    = 0.001;
+steps = 100;
+dt    = 0.002;
 num   = 10;
 
 #xyw   = np.genfromtxt('OUT/WALL.csv',delimiter=',');
@@ -28,9 +28,9 @@ for i in range(0,steps):
         except:
             pass;
     #plt.plot(xyw[:,0],xyw[:,1],'k');
-    plt.xlim([-0.3,0.3]);
-    plt.ylim([-0.3,0.3])
+    plt.xlim([-0.5,0.5]);
+    plt.ylim([-0.5,0.5])
     plt.gca().set_aspect('equal');
     plt.draw();
     plt.show();
-    TIME.sleep(0.5);
+    TIME.sleep(0.0001);

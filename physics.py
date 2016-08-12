@@ -31,6 +31,17 @@ def contact(body1, body2, CONT, I, J):
             CONT[J,I] = 1;
     return XY,CONT;
 
+def contact_V2(body1,body2,CONT,I,J):
+    # Function to detect whether there is contact between two bodies
+    XY   = np.array([]);
+    dx   = body1.xycent[0] - body2.xycent[0];
+    dy   = body1.xycent[1] - body2.xycent[1];
+    dist = np.sqrt(np.power(dx,2) + np.power(dy,2));
+    if ( (dist < (body1.R+body2.R)) ):
+        CONT[I,J] = 1;
+        CONT[J,I] = 1;
+    return XY,CONT;
+
 def wallCollision(bodies, wall, dt):
     # Function to calculate collision between bodies and the wall
     
@@ -111,7 +122,7 @@ def bodyCollision(bodies, dt):
         for j in range(i+1,num):
             body1   = bodies[i];
             body2   = bodies[j];
-            xy,CONT = contact(body1,body2,CONT,i,j);
+            XY,CONT = contact_V2(body1,body2,CONT,i,j);
     return CONT;
             
 def forwardEuler(bodies, wall, dt):
@@ -197,11 +208,6 @@ def jacobian(x,E,bodies,num):
             CONT[2*j:2*j+2,count] = -K*e;
             count += 1;
     CONT = CONT[:,~(CONT==0).all(0)]; # Remove zero columns from line-of-action matrix (bodies not in contact)
-    # Rule out forces that are (1) between 2 bodies at rest AND (2) orthogonal to any colliding body velocity vectors
-    for i in range(0,num):
-        vel = np.linalg.norm(V[:,i]);
-        if (vel < 1.0e-15):
-            
     # Construct matrix derivative of energy equation
     ENERGY = np.zeros(2*num);
     for i in range(0,num):
@@ -222,7 +228,53 @@ def jacobian(x,E,bodies,num):
     #print(DJ)
     return DJ,fval;
 
+def potentialFunction(r,R):
+    # Potential function for collision force calculation
 
+    return np.power(10.0,6.0)*np.abs(R-r);
+    #return np.power(10.0,11)*np.power(R-r,1.5);
+
+def potentialMethod(bodies,dt):
+    num      = np.size(bodies);
+    CONT     = bodyCollision(bodies,dt);
+    contacts = int(np.sum(np.triu(CONT,1)));
+    if (contacts > 0):
+        I,J      = CONT.nonzero();
+        bodInd   = np.unique(np.array([I,J]));
+        for i in range(0,contacts):
+            xij = bodies[J[i]].xycent - bodies[I[i]].xycent;
+            rij = np.linalg.norm(xij);
+            eij = xij/rij;
+            Rij = 1.0*(bodies[I[i]].R + bodies[J[i]].R);
+            Fij = potentialFunction(rij,Rij)*eij;
+            dvj = Fij*dt/bodies[J[i]].mass;
+            dvi = -Fij*dt/bodies[I[i]].mass;
+            uvi = bodies[I[i]].uv + dvi;
+            uvj = bodies[J[i]].uv + dvj;
+            dxi = uvi[0]*dt;
+            dyi = uvi[1]*dt;
+            dxj = uvj[0]*dt;
+            dyj = uvj[1]*dt;
+            bodies[I[i]].set_xy(bodies[I[i]].xy[:,0] + dxi , bodies[I[i]].xy[:,1] + dyi);
+            bodies[I[i]].set_uv(uvi[0],uvi[1]);
+            bodies[I[i]].calculateXYcent();
+            bodies[I[i]].clear_dudv();
+            bodies[I[i]].translateQuadtree(dxi,dyi);
+            bodies[J[i]].set_xy(bodies[J[i]].xy[:,0] + dxj , bodies[J[i]].xy[:,1] + dyj);
+            bodies[J[i]].set_uv(uvj[0],uvj[1]);
+            bodies[J[i]].calculateXYcent();
+            bodies[J[i]].clear_dudv();
+            bodies[J[i]].translateQuadtree(dxj,dyj);
+    else:
+        for i in range(0,num):
+            dx = bodies[i].uv[0]*dt;
+            dy = bodies[i].uv[1]*dt;
+            bodies[i].set_xy(bodies[i].xy[:,0] + dx , bodies[i].xy[:,1] + dy);
+            bodies[i].calculateXYcent();
+            bodies[i].clear_dudv();
+            bodies[i].translateQuadtree(dx,dy);
+            #bodies[i].calculateQuadtree(bodies[i].xy);
+    
 
 def forwardEuler_V2(bodies,dt):
     # Function to update body's position based on contact
