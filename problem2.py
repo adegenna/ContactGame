@@ -13,7 +13,7 @@ import physics
 dt    = 0.1e-3;
 # Generate cone of close-packed, equal sized balls
 # Generate first ball at bottom of cone
-levels  = 4;
+levels  = 5;
 samp    = 1000;
 R       = 0.05;
 X0      = 0;
@@ -60,7 +60,7 @@ for i in range(0,levels-1):
 
 # Generate a single ball above cone
 X0      = 0.0;
-Y0      = bodies[-1].xycent[1] - 8*R*1.003;
+Y0      = bodies[-1].xycent[1] - 10*R*1.1;
 x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
 y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
 xy      = np.transpose(np.array([x,y]));
@@ -81,7 +81,7 @@ bodies.append(surf);
 # ****************************************************
 
 # Physics timestepping
-steps = 1000;
+steps = 5000;
 for i in range(0,steps):
     print(str(i*dt) + '/' + str(steps*dt));
     physics.potentialMethod(bodies,dt);

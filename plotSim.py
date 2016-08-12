@@ -10,8 +10,8 @@ import time as TIME
 
 plt.ion()
 
-steps = 100;
-dt    = 0.002;
+steps = 1000;
+dt    = 0.001;
 num   = 10;
 
 #xyw   = np.genfromtxt('OUT/WALL.csv',delimiter=',');
