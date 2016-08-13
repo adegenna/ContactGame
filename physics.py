@@ -42,6 +42,31 @@ def contact_V2(body1,body2,CONT,I,J):
         CONT[J,I] = 1;
     return XY,CONT;
 
+def contactWall(body, wall):
+    # Function to detect whether there is contact between two bodies
+    XY   = np.array([]);
+    cols = np.shape(body.qt.values)[1] + np.shape(body.qt.data)[1];
+    for i in range(0,body.qt.num):
+        xy1 = wall.qt.search_QT(body.qt.data[i,0],body.qt.data[i,1]);
+        XY  = np.append(XY,xy1);
+    # Rule out collisions with positive normal velocity
+    if XY.any():
+        XY = np.reshape(XY,(np.size(XY)/cols,cols));
+        tx          = np.average(XY[:,2]);
+        ty          = np.average(XY[:,3]);
+        nx          = np.average(XY[:,4]);
+        ny          = np.average(XY[:,5]);
+        uv2         = body.uv;
+        tvel        = uv2[0]*tx + uv2[1]*ty;
+        nvel        = uv2[0]*nx + uv2[1]*ny;
+        # Remember contacting bodies
+        if (nvel <= 0):
+            XY_return = XY;
+        else:
+            XY_return = np.array([]);
+    return XY;
+
+
 def wallCollision(bodies, wall, dt):
     # Function to calculate collision between bodies and the wall
     
@@ -234,7 +259,36 @@ def potentialFunction(r,R):
     return np.power(10.0,6.0)*np.abs(R-r);
     #return np.power(10.0,11)*np.power(R-r,1.5);
 
-def potentialMethod(bodies,dt):
+def wallBoundaryCondition(bodies,wall,dt):
+    # Wall reflection boundary condition
+    num = np.size(bodies);
+    for i in range(0,num):    # Index through all bodies
+        body = bodies[i];
+        xy   = contactWall(body,wall);
+        if ( (xy.any()) ):
+            mass        = body.mass;
+            # Calculate average collision point properties
+            xmean       = np.average(xy[:,0]);
+            ymean       = np.average(xy[:,1]);
+            tx          = np.average(xy[:,2]);
+            ty          = np.average(xy[:,3]);
+            nx          = np.average(xy[:,4]);
+            ny          = np.average(xy[:,5]);
+            # Wall condition: reflection of normal velocity
+            u           = body.uv[0];
+            v           = body.uv[1];
+            tvel        = u*tx + v*ty;
+            nvel        = u*nx + v*ny;
+            tvelBounce  = tvel;
+            if (nvel <= 0):
+                nvelBounce  = -diff*nvel;
+            else:
+                nvelBounce  = diff*nvel;
+            uBounce     = tx*tvelBounce + nx*nvelBounce;
+            vBounce     = ty*tvelBounce + ny*nvelBounce;
+            bodies[i].set_uv(np.array([uBounce,vBounce]));
+    
+def potentialMethod(bodies,wall,dt):
     num      = np.size(bodies);
     CONT     = bodyCollision(bodies,dt);
     contacts = int(np.sum(np.triu(CONT,1)));
@@ -255,26 +309,17 @@ def potentialMethod(bodies,dt):
             dyi = uvi[1]*dt;
             dxj = uvj[0]*dt;
             dyj = uvj[1]*dt;
-            bodies[I[i]].set_xy(bodies[I[i]].xy[:,0] + dxi , bodies[I[i]].xy[:,1] + dyi);
             bodies[I[i]].set_uv(uvi[0],uvi[1]);
-            bodies[I[i]].calculateXYcent();
-            bodies[I[i]].clear_dudv();
-            bodies[I[i]].translateQuadtree(dxi,dyi);
-            bodies[J[i]].set_xy(bodies[J[i]].xy[:,0] + dxj , bodies[J[i]].xy[:,1] + dyj);
             bodies[J[i]].set_uv(uvj[0],uvj[1]);
-            bodies[J[i]].calculateXYcent();
-            bodies[J[i]].clear_dudv();
-            bodies[J[i]].translateQuadtree(dxj,dyj);
-    else:
-        for i in range(0,num):
-            dx = bodies[i].uv[0]*dt;
-            dy = bodies[i].uv[1]*dt;
-            bodies[i].set_xy(bodies[i].xy[:,0] + dx , bodies[i].xy[:,1] + dy);
-            bodies[i].calculateXYcent();
-            bodies[i].clear_dudv();
-            bodies[i].translateQuadtree(dx,dy);
-            #bodies[i].calculateQuadtree(bodies[i].xy);
-    
+    # Wall reflection boundary condition        
+    wallBoundaryCondition(bodies,wall,dt);            
+    for i in range(0,num):
+        dx = bodies[i].uv[0]*dt;
+        dy = bodies[i].uv[1]*dt;
+        bodies[i].set_xy(bodies[i].xy[:,0] + dx , bodies[i].xy[:,1] + dy);
+        bodies[i].calculateXYcent();
+        bodies[i].clear_dudv();
+        bodies[i].translateQuadtree(dx,dy);
 
 def forwardEuler_V2(bodies,dt):
     # Function to update body's position based on contact

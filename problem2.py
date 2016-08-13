@@ -25,7 +25,7 @@ uv1     = np.array([0.0,0.0]);
 surf1   = Surf.Surface(xy1,uv1,R,dt);
 bodies  = [surf1];
 
-sepR    = 1.01;
+sepR    = 1.05;
 
 for i in range(0,levels-1):
     # Generate balls left and right of leftmost ball
@@ -58,23 +58,24 @@ for i in range(0,levels-1):
         surf    = Surf.Surface(xy,uv,R,dt);
         bodies.append(surf);
 
+print(np.shape(bodies))
 # Generate a single ball above cone
-X0      = 0.0;
-Y0      = bodies[-1].xycent[1] - 10*R*1.1;
+X0      = 2*R;
+Y0      = bodies[-1].xycent[1] - 7*R*1.1;
 x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
 y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
 xy      = np.transpose(np.array([x,y]));
-uv      = np.array([0.0,4.0]);
+uv      = np.array([-1.0,4.0]);
 surf    = Surf.Surface(xy,uv,R,dt);
 bodies.append(surf);
 
 # Generate wall
-# xw     = np.linspace(-1.2*R*(levels+1),1.2*R*(levels+1),2*samp);
-# yw     = np.abs(xw)*np.sqrt(3.0);
-# xyw    = np.transpose(np.array([xw,yw]));
-# uvw    = np.array([0.0,0.0]);
-# wall   = Surf.Surface(xyw,uvw,0);
-# np.savetxt('OUT/WALL.csv',xyw,delimiter=',');
+xw     = np.linspace(-10*R,10*R,2*samp);
+yw     = np.zeros(2*samp);
+xyw    = np.transpose(np.array([xw,yw]));
+uvw    = np.array([0.0,0.0]);
+wall   = Surf.Surface(xyw,uvw,0,0);
+np.savetxt('OUT4/WALL.csv',xyw,delimiter=',');
 
 # ****************************************************
 # MECHANICS
@@ -84,8 +85,8 @@ bodies.append(surf);
 steps = 5000;
 for i in range(0,steps):
     print(str(i*dt) + '/' + str(steps*dt));
-    physics.potentialMethod(bodies,dt);
+    physics.potentialMethod(bodies,wall,dt);
     for j in range(0,np.size(bodies)):
-        np.savetxt('OUT/T' + str((i+1)*dt) + '_' + str(j) + '.csv',bodies[j].xy,delimiter=',');
+        np.savetxt('OUT4/T' + str((i+1)*dt) + '_' + str(j) + '.csv',bodies[j].xy,delimiter=',');
 
 

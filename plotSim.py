@@ -11,8 +11,8 @@ import time as TIME
 plt.ion()
 
 steps = 1000;
-dt    = 0.001;
-num   = 10;
+dt    = 0.005;
+num   = 20;
 
 #xyw   = np.genfromtxt('OUT/WALL.csv',delimiter=',');
 #plt.plot(xyw[:,0],xyw[:,1],'k');
@@ -23,14 +23,14 @@ for i in range(0,steps):
     time = (i+1)*dt;
     for j in range(0,num):
         try:
-            xy   = np.genfromtxt('OUT/T' + str((i+1)*dt) + '_' + str(j) + '.csv',delimiter=',');
+            xy   = np.genfromtxt('OUT4/T' + str((i+1)*dt) + '_' + str(j) + '.csv',delimiter=',');
             plt.plot(xy[:,0],xy[:,1],'b');
         except:
             pass;
     #plt.plot(xyw[:,0],xyw[:,1],'k');
-    plt.xlim([-0.5,0.5]);
-    plt.ylim([-0.5,0.5])
+    plt.xlim([-1,1]);
+    plt.ylim([-1,1])
     plt.gca().set_aspect('equal');
     plt.draw();
     plt.show();
-    TIME.sleep(0.0001);
+    #TIME.sleep(1);
