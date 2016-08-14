@@ -18,7 +18,7 @@ xyw   = np.genfromtxt('OUT4/WALL.csv',delimiter=',');
 plt.plot(xyw[:,0],xyw[:,1],'k');
 
 for i in range(0,steps):
-    print(i+1)
+    print('OUT4/T' + str((i+1)*dt))
     plt.gca().clear();
     time = (i+1)*dt;
     for j in range(0,num):
@@ -29,7 +29,7 @@ for i in range(0,steps):
             pass;
     plt.plot(xyw[:,0],xyw[:,1],'k');
     plt.xlim([-1,1]);
-    plt.ylim([-1,1])
+    plt.ylim([0,1])
     plt.gca().set_aspect('equal');
     plt.draw();
     plt.show();

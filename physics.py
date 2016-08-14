@@ -256,7 +256,7 @@ def jacobian(x,E,bodies,num):
 def potentialFunction(r,R):
     # Potential function for collision force calculation
 
-    return np.power(10.0,6.0)*np.abs(R-r);
+    return np.power(10.0,5.0)*np.abs(R-r);
     #return np.power(10.0,11)*np.power(R-r,1.5);
 
 def wallBoundaryCondition(bodies,wall,dt):
@@ -317,6 +317,7 @@ def potentialMethod(bodies,wall,dt):
         dx = bodies[i].uv[0]*dt;
         dy = bodies[i].uv[1]*dt;
         bodies[i].set_xy(bodies[i].xy[:,0] + dx , bodies[i].xy[:,1] + dy);
+        bodies[i].set_uv(bodies[i].uv[0] , bodies[i].uv[1] + GRAV*dt);
         bodies[i].calculateXYcent();
         bodies[i].clear_dudv();
         bodies[i].translateQuadtree(dx,dy);
