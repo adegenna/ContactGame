@@ -286,7 +286,7 @@ def wallBoundaryCondition(bodies,wall,dt):
                 nvelBounce  = diff*nvel;
             uBounce     = tx*tvelBounce + nx*nvelBounce;
             vBounce     = ty*tvelBounce + ny*nvelBounce;
-            bodies[i].set_uv(np.array([uBounce,vBounce]));
+            bodies[i].set_uv(uBounce,vBounce);
     
 def potentialMethod(bodies,wall,dt):
     num      = np.size(bodies);

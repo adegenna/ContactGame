@@ -10,7 +10,7 @@ import physics
 # GEOMETRY
 # ****************************************************
 
-dt    = 0.1e-3;
+dt    = 1.0e-4;
 # Generate cone of close-packed, equal sized balls
 # Generate first ball at bottom of cone
 levels  = 5;
@@ -65,14 +65,15 @@ Y0      = bodies[-1].xycent[1] - 7*R*1.1;
 x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
 y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
 xy      = np.transpose(np.array([x,y]));
-uv      = np.array([-1.0,4.0]);
+uv      = np.array([-1.0,-4.0]);
 surf    = Surf.Surface(xy,uv,R,dt);
 bodies.append(surf);
 
 # Generate wall
-xw     = np.linspace(-10*R,10*R,2*samp);
-yw     = np.zeros(2*samp);
+xw     = np.hstack([np.linspace(-10*R,10*R,samp),10*R*np.ones(samp),np.linspace(10*R,-10*R,samp),-10*R*np.ones(samp)])
+yw     = np.hstack([np.zeros(samp),np.linspace(0,20*R,samp),20*R*np.ones(samp),np.linspace(20*R,0,samp)]);
 xyw    = np.transpose(np.array([xw,yw]));
+print(np.shape(xyw))
 uvw    = np.array([0.0,0.0]);
 wall   = Surf.Surface(xyw,uvw,0,0);
 np.savetxt('OUT4/WALL.csv',xyw,delimiter=',');
