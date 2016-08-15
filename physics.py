@@ -302,15 +302,12 @@ def potentialMethod(bodies,wall,dt):
             Rij = 1.0*(bodies[I[i]].R + bodies[J[i]].R);
             Fij = potentialFunction(rij,Rij)*eij;
             dvj = Fij*dt/bodies[J[i]].mass;
-            dvi = -Fij*dt/bodies[I[i]].mass;
-            uvi = bodies[I[i]].uv + dvi;
-            uvj = bodies[J[i]].uv + dvj;
-            dxi = uvi[0]*dt;
-            dyi = uvi[1]*dt;
-            dxj = uvj[0]*dt;
-            dyj = uvj[1]*dt;
-            bodies[I[i]].set_uv(uvi[0],uvi[1]);
-            bodies[J[i]].set_uv(uvj[0],uvj[1]);
+            dvi = -Fij*dt/bodies[I[i]].mass;            
+            bodies[I[i]].increment_dudv(dvi[0],dvi[1]);
+            bodies[J[i]].increment_dudv(dvj[0],dvj[1]);
+    for i in range(0,num):
+        uv = bodies[i].uv + bodies[i].dudv;
+        bodies[i].set_uv(uv[0],uv[1]);
     # Wall reflection boundary condition        
     wallBoundaryCondition(bodies,wall,dt);            
     for i in range(0,num):

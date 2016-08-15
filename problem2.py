@@ -6,6 +6,8 @@ import Surface as Surf
 from contact import contact
 import physics
 
+OUTDIR = "/home/adegenna/ContactGame/OUT";
+
 # ****************************************************
 # GEOMETRY
 # ****************************************************
@@ -14,7 +16,7 @@ dt    = 1.0e-4;
 # Generate cone of close-packed, equal sized balls
 # Generate first ball at bottom of cone
 levels  = 4;
-samp    = 5000;
+samp    = 500;
 R       = 0.05;
 X0      = 0;
 Y0      = 2*R*1.1;
@@ -76,18 +78,18 @@ xyw    = np.transpose(np.array([xw,yw]));
 print(np.shape(xyw))
 uvw    = np.array([0.0,0.0]);
 wall   = Surf.Surface(xyw,uvw,0,0);
-np.savetxt('OUT4/WALL.csv',xyw,delimiter=',');
+np.savetxt(OUTDIR + '/WALL.csv',xyw,delimiter=',');
 
 # ****************************************************
 # MECHANICS
 # ****************************************************
 
 # Physics timestepping
-steps = 5000;
+steps = 10000;
 for i in range(0,steps):
     print(str(i*dt) + '/' + str(steps*dt));
     physics.potentialMethod(bodies,wall,dt);
     for j in range(0,np.size(bodies)):
-        np.savetxt('OUT4/T' + str((i+1)*dt) + '_' + str(j) + '.csv',bodies[j].xy,delimiter=',');
+        np.savetxt(OUTDIR + '/T' + str((i+1)*dt) + '_' + str(j) + '.csv',bodies[j].xycent,delimiter=',');
 
 
