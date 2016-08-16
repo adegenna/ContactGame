@@ -11,8 +11,8 @@ import time as TIME
 plt.ion()
 
 steps = 1000;
-dt    = 0.01;
-num   = 20;
+dt    = 0.005;
+num   = 21;
 R     = 0.05;
 samp  = 30;
 x     = R*np.cos(np.linspace(-np.pi,np.pi,samp));
@@ -36,8 +36,8 @@ for i in range(0,steps):
             pass;
     plt.plot(xyw[:,0],xyw[:,1],'k');
     plt.xlim([-1,1]);
-    plt.ylim([0,1])
+    plt.ylim([0,1.1])
     plt.gca().set_aspect('equal');
     plt.draw();
     plt.show();
-    #TIME.sleep(1);
+    #TIME.sleep(3);

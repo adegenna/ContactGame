@@ -16,7 +16,7 @@ dt    = 1.0e-4;
 # Generate cone of close-packed, equal sized balls
 # Generate first ball at bottom of cone
 levels  = 4;
-samp    = 500;
+samp    = 50;
 R       = 0.05;
 X0      = 0;
 Y0      = 2*R*1.1;
@@ -85,7 +85,7 @@ np.savetxt(OUTDIR + '/WALL.csv',xyw,delimiter=',');
 # ****************************************************
 
 # Physics timestepping
-steps = 10000;
+steps = 50000;
 for i in range(0,steps):
     print(str(i*dt) + '/' + str(steps*dt));
     physics.potentialMethod(bodies,wall,dt);
