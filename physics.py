@@ -256,8 +256,9 @@ def jacobian(x,E,bodies,num):
 def potentialFunction(r,R):
     # Potential function for collision force calculation
 
-    #return np.power(10.0,10.0)*np.power(np.abs(R-r),2.0);
-    return np.power(10.0,5.0)*np.power(np.abs(R-r),0.85); 
+    dist  = np.minimum(np.abs(R-r),0.0008*R);
+    F     = np.power(10.0,5.0)*np.power(dist,0.85);
+    return F;
     #return np.power(10.0,11)*np.power(R-r,1.5);
 
 def wallBoundaryCondition(bodies,wall,dt):
@@ -306,11 +307,20 @@ def potentialMethod(bodies,wall,dt):
             dvi = -diff*Fij*dt/bodies[I[i]].mass;            
             bodies[I[i]].increment_dudv(dvi[0],dvi[1]);
             bodies[J[i]].increment_dudv(dvj[0],dvj[1]);
+    # Calculate total initial/final energies
+    E0 = 0.0; Ef = 0.0;
     for i in range(0,num):
-        uv = bodies[i].uv + bodies[i].dudv;
+        vel0 = np.linalg.norm(bodies[i].uv);
+        E0  += 0.5*bodies[i].mass*np.power(vel0,2);
+        velf = np.linalg.norm(bodies[i].uv + bodies[i].dudv);
+        Ef  += 0.5*bodies[i].mass*np.power(velf,2);
+    # Update particle velocities
+    Efac = np.sqrt(E0/Ef);
+    for i in range(0,num):
+        uv = (bodies[i].uv + bodies[i].dudv)*Efac;
         bodies[i].set_uv(uv[0],uv[1]);
     # Wall reflection boundary condition        
-    wallBoundaryCondition(bodies,wall,dt);            
+    wallBoundaryCondition(bodies,wall,dt);
     for i in range(0,num):
         dx = bodies[i].uv[0]*dt;
         dy = bodies[i].uv[1]*dt;

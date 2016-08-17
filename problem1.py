@@ -15,7 +15,7 @@ OUTDIR = "/home/adegenna/ContactGame/OUT";
 dt    = 1.0e-4;
 # Generate cone of close-packed, equal sized balls
 # Generate first ball at bottom of cone
-levels  = 2;
+levels  = 3;
 samp    = 50;
 R       = 0.05;
 x       = R*np.cos(np.linspace(-np.pi,np.pi,samp));
@@ -37,14 +37,31 @@ for i in range(0,levels):
 print(np.shape(bodies))
 
 # Generate balls above floor
-X0      = 2*R;
-Y0      = (2*(levels+1)+1)*R*1.01;
+X0      = 4*R;
+Y0      = 10*R;
 x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
 y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
 xy      = np.transpose(np.array([x,y]));
-uv      = np.array([-1.0,-4.0]);
+uv      = np.array([-3.0,-3.0]);
 surf    = Surf.Surface(xy,uv,R,dt);
 bodies.append(surf);
+X0      = 6*R;
+Y0      = 10*R;
+x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
+y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
+xy      = np.transpose(np.array([x,y]));
+uv      = np.array([-3.0,-3.0]);
+surf    = Surf.Surface(xy,uv,R,dt);
+bodies.append(surf);
+X0      = 8*R;
+Y0      = 10*R;
+x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
+y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
+xy      = np.transpose(np.array([x,y]));
+uv      = np.array([-3.0,-3.0]);
+surf    = Surf.Surface(xy,uv,R,dt);
+bodies.append(surf);
+
 
 # Generate wall
 samp   = 500;
@@ -64,8 +81,10 @@ np.savetxt(OUTDIR + '/WALL.csv',xyw,delimiter=',');
 
 # Physics timestepping
 steps = 50000;
+STATE = np.zeros([np.size(bodies),2]);
 for i in range(0,steps):
     print(str(i*dt) + '/' + str(steps*dt));
     physics.potentialMethod(bodies,wall,dt);
     for j in range(0,np.size(bodies)):
-        np.savetxt(OUTDIR + '/T' + str((i+1)*dt) + '_' + str(j) + '.csv',bodies[j].xycent,delimiter=',');
+        STATE[j,:] = bodies[j].xycent;
+    np.savetxt(OUTDIR + '/T' + str((i+1)*dt) + '.csv',STATE,delimiter=',');

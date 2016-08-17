@@ -11,8 +11,8 @@ import time as TIME
 plt.ion()
 
 steps = 1000;
-dt    = 0.005;
-num   = 21;
+dt    = 0.01;
+num   = 30;
 R     = 0.05;
 samp  = 30;
 x     = R*np.cos(np.linspace(-np.pi,np.pi,samp));
@@ -26,18 +26,18 @@ for i in range(0,steps):
     print('OUT/T' + str((i+1)*dt))
     plt.gca().clear();
     time = (i+1)*dt;
-    for j in range(0,num):
-        try:
-            xy0   = np.genfromtxt('OUT/T' + str((i+1)*dt) + '_' + str(j) + '.csv',delimiter=',');
-            xt    = xy0[0] + x;
-            yt    = xy0[1] + y;
+    try:
+        xy0   = np.genfromtxt('OUT/T' + str((i+1)*dt) + '.csv',delimiter=',');
+        for j in range(0,num):
+            xt    = xy0[j,0] + x;
+            yt    = xy0[j,1] + y;
             plt.plot(xt,yt,'b');
-        except:
-            pass;
+    except:
+        pass;
     plt.plot(xyw[:,0],xyw[:,1],'k');
     plt.xlim([-1,1]);
     plt.ylim([0,1.1])
     plt.gca().set_aspect('equal');
     plt.draw();
     plt.show();
-    #TIME.sleep(3);
+    #TIME.sleep(0.5);
