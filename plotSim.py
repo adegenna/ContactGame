@@ -12,8 +12,8 @@ plt.ion()
 
 steps = 1000;
 dt    = 0.01;
-num   = 30;
-R     = 0.05;
+num   = 144;
+R     = 0.01;
 samp  = 30;
 x     = R*np.cos(np.linspace(-np.pi,np.pi,samp));
 y     = R*np.sin(np.linspace(-np.pi,np.pi,samp));
@@ -32,6 +32,9 @@ for i in range(0,steps):
             xt    = xy0[j,0] + x;
             yt    = xy0[j,1] + y;
             plt.plot(xt,yt,'b');
+        xt    = xy0[-1,0] + 5*x;
+        yt    = xy0[-1,1] + 5*y;
+        plt.plot(xt,yt,'b');
     except:
         pass;
     plt.plot(xyw[:,0],xyw[:,1],'k');

@@ -17,7 +17,7 @@ dt    = 1.0e-4;
 # Generate first ball at bottom of cone
 levels  = 3;
 samp    = 50;
-R       = 0.05;
+R       = 0.01;
 x       = R*np.cos(np.linspace(-np.pi,np.pi,samp));
 y       = R*np.sin(np.linspace(-np.pi,np.pi,samp));
 xy1     = np.transpose(np.array([x,y]));
@@ -25,7 +25,7 @@ uv1     = np.array([0.0,0.0]);
 sepR    = 1.0;
 bodies  = [];
 for i in range(0,levels):
-    for j in range(-4,4):
+    for j in range(-24,24):
         X0   = (2*j+1)*R;
         Y0   = (2*i+1)*R*1.01 + 0.02;
         xc   = X0 + x;
@@ -37,38 +37,38 @@ for i in range(0,levels):
 print(np.shape(bodies))
 
 # Generate balls above floor
-X0      = 4*R;
-Y0      = 10*R;
+R       = 5*R;
+X0      = 3*R;
+Y0      = 3*R;
 x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
 y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
 xy      = np.transpose(np.array([x,y]));
 uv      = np.array([-3.0,-3.0]);
 surf    = Surf.Surface(xy,uv,R,dt);
 bodies.append(surf);
-X0      = 6*R;
-Y0      = 10*R;
-x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
-y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
-xy      = np.transpose(np.array([x,y]));
-uv      = np.array([-3.0,-3.0]);
-surf    = Surf.Surface(xy,uv,R,dt);
-bodies.append(surf);
-X0      = 8*R;
-Y0      = 10*R;
-x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
-y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
-xy      = np.transpose(np.array([x,y]));
-uv      = np.array([-3.0,-3.0]);
-surf    = Surf.Surface(xy,uv,R,dt);
-bodies.append(surf);
-
+# X0      = 18*R;
+# Y0      = 10*R;
+# x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
+# y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
+# xy      = np.transpose(np.array([x,y]));
+# uv      = np.array([-3.0,-3.0]);
+# surf    = Surf.Surface(xy,uv,R,dt);
+# bodies.append(surf);
+# X0      = 20*R;
+# Y0      = 10*R;
+# x       = X0 + R*np.cos(np.linspace(-np.pi,np.pi,samp));
+# y       = Y0 + R*np.sin(np.linspace(-np.pi,np.pi,samp));
+# xy      = np.transpose(np.array([x,y]));
+# uv      = np.array([-3.0,-3.0]);
+# surf    = Surf.Surface(xy,uv,R,dt);
+# bodies.append(surf);
 
 # Generate wall
 samp   = 500;
-x1     = 10*R*np.linspace(-1,1,samp);
-y1     = 10*R*np.linspace(-0,2,samp);
-xw     = np.hstack([x1,10*R*np.ones(samp),-x1,-10*R*np.ones(samp)])
-yw     = np.hstack([np.zeros(samp),y1,20*R*np.ones(samp),y1[::-1]]) + 0.02;
+x1     = 0.5*np.linspace(-1,1,samp);
+y1     = 0.5*np.linspace(0,2,samp);
+xw     = np.hstack([x1,0.5*np.ones(samp),-x1,-0.5*np.ones(samp)])
+yw     = np.hstack([np.zeros(samp),y1,1*np.ones(samp),y1[::-1]]) + 0.02;
 xyw    = np.transpose(np.array([xw,yw]));
 print(np.shape(xyw))
 uvw    = np.array([0.0,0.0]);
