@@ -72,8 +72,7 @@ def wallCollision(bodies, wall, dt):
     
     num = np.size(bodies);
     for i in range(0,num):    # Index through all bodies
-        body = bodies[i];
-        xy   = contact(body,wall);
+        body    = bodies[i];
         if ( (xy.any()) ):
             mass        = body.mass;
             # Calculate average collision point properties
@@ -256,17 +255,21 @@ def jacobian(x,E,bodies,num):
 def potentialFunction(r,R):
     # Potential function for collision force calculation
 
-    dist  = np.minimum(np.abs(R-r),0.0008*R);
+    dist  = np.minimum(np.abs(R-r),0.001*R);
     F     = np.power(10.0,5.0)*np.power(dist,0.85);
     return F;
-    #return np.power(10.0,11)*np.power(R-r,1.5);
+    #return np.power(10.0,5.0)*np.power(dist,0.85); R = 0.05
 
 def wallBoundaryCondition(bodies,wall,dt):
     # Wall reflection boundary condition
-    num = np.size(bodies);
+    num     = np.size(bodies);
+    numwall = np.size(wall);
     for i in range(0,num):    # Index through all bodies
         body = bodies[i];
-        xy   = contactWall(body,wall);
+        xy   = np.array([]);
+        for j in range(0,numwall):
+            xy_j = contactWall(body,wall[j]);
+            xy = np.append(xy,xy_j);
         if ( (xy.any()) ):
             mass        = body.mass;
             # Calculate average collision point properties
@@ -311,9 +314,10 @@ def potentialMethod(bodies,wall,dt):
     E0 = 0.0; Ef = 0.0;
     for i in range(0,num):
         vel0 = np.linalg.norm(bodies[i].uv);
-        E0  += 0.5*bodies[i].mass*np.power(vel0,2);
-        velf = np.linalg.norm(bodies[i].uv + bodies[i].dudv);
-        Ef  += 0.5*bodies[i].mass*np.power(velf,2);
+        E0  += 0.5*bodies[i].mass*np.power(vel0,2) - bodies[i].mass*GRAV*bodies[i].xycent[1];
+        VELF = bodies[i].uv + bodies[i].dudv;
+        velf = np.linalg.norm(VELF);
+        Ef  += 0.5*bodies[i].mass*np.power(velf,2) - bodies[i].mass*GRAV*(bodies[i].xycent[1] + VELF[1]*dt);
     # Update particle velocities
     Efac = np.sqrt(E0/Ef);
     for i in range(0,num):
