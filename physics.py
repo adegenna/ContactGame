@@ -266,11 +266,13 @@ def wallBoundaryCondition(bodies,wall,dt):
     numwall = np.size(wall);
     for i in range(0,num):    # Index through all bodies
         body = bodies[i];
+        cols = np.shape(body.qt.values)[1] + np.shape(body.qt.data)[1];
         xy   = np.array([]);
         for j in range(0,numwall):
             xy_j = contactWall(body,wall[j]);
             xy = np.append(xy,xy_j);
         if ( (xy.any()) ):
+            xy          = np.reshape(xy,(np.size(xy)/cols,cols));
             mass        = body.mass;
             # Calculate average collision point properties
             xmean       = np.average(xy[:,0]);
