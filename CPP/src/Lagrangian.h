@@ -12,18 +12,32 @@ using namespace Eigen;
 // ***************************************************
 
 class Lagrangian {
+
  public:
   
   Lagrangian();
   Lagrangian(Options& options);
   ~Lagrangian();
-  setupInitialConditions();
-
+  void setupInitialConditions();
+  void updateXY(MatrixXd& DXY);
+  void writeXY();
+  void eulerDXY(MatrixXd& DXY);
+  void integrate();
+  
  private:
 
   std::string inputfile_;
+  std::string projdir_;
+  std::string outdir_;
+  std::string loaddir_;
+  std::string integrator_;
   MatrixXd input_;
+  MatrixXd XY_;
+  MatrixXd UV_;
+  VectorXd R_;
   int samples_;
+  double dt_;
+  int tsteps_;
   
 };
 

@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 
   // Solve
   lagrangian.setupInitialConditions();
-  lagrangian.solve();
+  lagrangian.integrate();
   
   return 0;
 }

@@ -2,6 +2,8 @@
 #include <vector>
 #include <fstream>
 
+using namespace Eigen;
+
 template<typename M>
 M load_csv (const std::string & path) {
     std::ifstream indata;
@@ -17,5 +19,5 @@ M load_csv (const std::string & path) {
         }
         ++rows;
     }
-    return Eigen::Map<const Eigen::Matrix<typename M::Scalar, M::RowsAtCompileTime, M::ColsAtCompileTime, RowMajor>>(values.data(), rows, values.size()/rows);
+    return Map<const Matrix<typename M::Scalar, M::RowsAtCompileTime, M::ColsAtCompileTime, RowMajor>>(values.data(), rows, values.size()/rows);
 }
