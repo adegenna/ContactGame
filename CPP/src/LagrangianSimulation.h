@@ -1,5 +1,5 @@
-#ifndef __LAGRANGIAN_H__
-#define __LAGRANGIAN_H__
+#ifndef __LAGRANGIANSIMULATION_H__
+#define __LAGRANGIANSIMULATION_H__
 
 #include <eigen/Eigen/Dense>
 #include "options.hpp"
@@ -11,13 +11,13 @@ using namespace Eigen;
 // CLASS FOR LAGRANGIAN
 // ***************************************************
 
-class Lagrangian {
+class LagrangianSimulation {
 
  public:
-  
-  Lagrangian();
-  Lagrangian(Options& options);
-  ~Lagrangian();
+
+  LagrangianSimulation();
+  LagrangianSimulation(Options& options);
+  ~LagrangianSimulation();
   void setupInitialConditions();
   void updateXY(MatrixXd& DXY);
   void writeXY();

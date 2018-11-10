@@ -11,13 +11,13 @@
 #include <boost/program_options.hpp>
 #include "options.hpp"
 #include "options_parser.hpp"
-#include "Lagrangian.h"
+#include "LagrangianSimulation.h"
 
 using namespace std;
 using namespace Eigen;
 
 // ***************************************************
-// DRIVER PROGRAM FOR LDO COEFFICIENT INFERENCE
+// DRIVER PROGRAM FOR LAGRANGIAN SIMULATION
 // ***************************************************
 
 int main(int argc, char* argv[]) {
@@ -31,11 +31,11 @@ int main(int argc, char* argv[]) {
   cout << options << endl;
 
   // Pass parsed program options to simulation
-  Lagrangian lagrangian(options);
+  LagrangianSimulation simulation(options);
 
   // Solve
-  lagrangian.setupInitialConditions();
-  lagrangian.integrate();
+  simulation.setupInitialConditions();
+  simulation.integrate();
   
   return 0;
 }

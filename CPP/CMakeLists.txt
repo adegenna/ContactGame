@@ -16,7 +16,7 @@ include_directories( ${CMAKE_SOURCE_DIR}
 add_executable( testall
   tests/tests.cpp
   src/Inputfile.hpp
-  src/Lagrangian.cpp
+  src/LagrangianSimulation.cpp
   tests/inputs_test.cpp
   tests/lagrangian_test.cpp
 )
@@ -24,7 +24,7 @@ add_executable( testall
 add_executable( solver
   src/driver.cpp
   src/Inputfile.hpp
-  src/Lagrangian.cpp
+  src/LagrangianSimulation.cpp
   src/options.hpp
   src/options_parser.hpp
 )

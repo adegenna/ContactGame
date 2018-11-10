@@ -1,4 +1,4 @@
-#include "Lagrangian.h"
+#include "LagrangianSimulation.h"
 #include "Inputfile.hpp"
 #include <stdlib.h>
 #include <stdio.h>
@@ -19,11 +19,11 @@ namespace po = boost::program_options;
 // CLASS FOR LAGRANGIAN COEFFICIENT INFERENCE
 // ***************************************************
 
-Lagrangian::Lagrangian() {
+LagrangianSimulation::LagrangianSimulation() {
 
 }
 
-Lagrangian::Lagrangian(Options& o) {
+LagrangianSimulation::LagrangianSimulation(Options& o) {
 
   std::cout << "****************** LAGRANGIAN INITIALIZATION ****************" << endl << endl;
   // Parameters
@@ -37,11 +37,11 @@ Lagrangian::Lagrangian(Options& o) {
   
 }
 
-Lagrangian::~Lagrangian() {
+LagrangianSimulation::~LagrangianSimulation() {
 
 }
 
-void Lagrangian::setupInitialConditions() {
+void LagrangianSimulation::setupInitialConditions() {
   input_   = load_csv<MatrixXd>(projdir_ + loaddir_ + inputfile_);
   samples_ = input_.rows();
   XY_      = input_.block(0,0,samples_,2);
@@ -50,12 +50,12 @@ void Lagrangian::setupInitialConditions() {
   
 }
 
-void Lagrangian::updateXY(MatrixXd& DXY) {
+void LagrangianSimulation::updateXY(MatrixXd& DXY) {
   XY_ += DXY;
 
 }
 
-void Lagrangian::writeXY() {
+void LagrangianSimulation::writeXY() {
   const static IOFormat CSVFormat(StreamPrecision, DontAlignCols, ", ", "\n");
   ofstream xyout(projdir_ + outdir_ + "XY.csv");
   xyout << XY_.format(CSVFormat);
@@ -63,12 +63,12 @@ void Lagrangian::writeXY() {
   
 }
 
-void Lagrangian::eulerDXY(MatrixXd& DXY) {
+void LagrangianSimulation::eulerDXY(MatrixXd& DXY) {
   DXY.resize(samples_,2);
   DXY = UV_*dt_;
 }
 
-void Lagrangian::integrate() {
+void LagrangianSimulation::integrate() {
   MatrixXd DXY;
   for (int i=0; i<tsteps_; i++) {
     eulerDXY(DXY);
