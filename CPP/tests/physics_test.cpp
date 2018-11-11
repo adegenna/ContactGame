@@ -1,27 +1,36 @@
 #include <boost/program_options.hpp>
-#include "lagrangian_test.h"
+#include "physics_test.h"
 #include "../src/Inputfile.hpp"
 #include "../src/LagrangianSimulation.h"
+#include "../src/ParticlePhysics.h"
 
 using namespace Eigen;
 
-TEST_F(LagrangianTest, testUpdateXY) {
+TEST_F(PhysicsTest, testEulerIntegrator) {
+
   Options options;
   options.projDir   = "/home/adegennaro/ContactGame/CPP/";
   options.outDir    = "tests/";
   options.loadDir   = "tests/";
   options.inputfile = "testinput.csv";
+  options.dt        = 0.1;
+  options.tsteps    = 10;
+  
+  // Setup
+  LagrangianSimulation simulation(options);
+  ParticlePhysics physics(options, simulation);
+  
+  // Solve
+  simulation.setupInitialConditions();
+  physics.simulate();
 
-  LagrangianSimulation solver(options);
-
-  solver.setupInitialConditions();
-  solver.updateXY(DXY_);
-  solver.writeXY("final");
-
+  // Output
+  simulation.writeXY("final");
+  
   // Read the output
   MatrixXd out;
   out   = load_csv<MatrixXd>(options.projDir + options.outDir + "XY_final.csv");
   
-  ASSERT_TRUE(out.isApprox(X_+DXY_));
+  ASSERT_TRUE(out.isApprox(Xfinal_));
   
 }

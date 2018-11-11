@@ -17,14 +17,17 @@ add_executable( testall
   tests/tests.cpp
   src/Inputfile.hpp
   src/LagrangianSimulation.cpp
+  src/ParticlePhysics.cpp
   tests/inputs_test.cpp
   tests/lagrangian_test.cpp
+  tests/physics_test.cpp
 )
 
 add_executable( solver
   src/driver.cpp
   src/Inputfile.hpp
   src/LagrangianSimulation.cpp
+  src/ParticlePhysics.cpp
   src/options.hpp
   src/options_parser.hpp
 )

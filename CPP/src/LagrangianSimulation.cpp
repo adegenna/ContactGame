@@ -25,15 +25,11 @@ LagrangianSimulation::LagrangianSimulation() {
 
 LagrangianSimulation::LagrangianSimulation(Options& o) {
 
-  std::cout << "****************** LAGRANGIAN INITIALIZATION ****************" << endl << endl;
   // Parameters
   inputfile_  = o.inputfile;
   projdir_    = o.projDir;
   outdir_     = o.outDir;
   loaddir_    = o.loadDir;
-  dt_         = o.dt;
-  integrator_ = o.integrator;
-  tsteps_     = o.tsteps;
   
 }
 
@@ -55,24 +51,10 @@ void LagrangianSimulation::updateXY(MatrixXd& DXY) {
 
 }
 
-void LagrangianSimulation::writeXY() {
+void LagrangianSimulation::writeXY(std::string append) {
   const static IOFormat CSVFormat(StreamPrecision, DontAlignCols, ", ", "\n");
-  ofstream xyout(projdir_ + outdir_ + "XY.csv");
+  ofstream xyout(projdir_ + outdir_ + "XY_" + append + ".csv");
   xyout << XY_.format(CSVFormat);
   xyout.close();
   
-}
-
-void LagrangianSimulation::eulerDXY(MatrixXd& DXY) {
-  DXY.resize(samples_,2);
-  DXY = UV_*dt_;
-}
-
-void LagrangianSimulation::integrate() {
-  MatrixXd DXY;
-  for (int i=0; i<tsteps_; i++) {
-    eulerDXY(DXY);
-    updateXY(DXY);
-  }
-  writeXY();
 }

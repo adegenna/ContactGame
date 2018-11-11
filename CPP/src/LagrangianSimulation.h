@@ -20,9 +20,9 @@ class LagrangianSimulation {
   ~LagrangianSimulation();
   void setupInitialConditions();
   void updateXY(MatrixXd& DXY);
-  void writeXY();
-  void eulerDXY(MatrixXd& DXY);
-  void integrate();
+  void writeXY(std::string append);
+  int getSamples() { return samples_; }
+  MatrixXd getUV() { return UV_; } 
   
  private:
 
@@ -30,14 +30,11 @@ class LagrangianSimulation {
   std::string projdir_;
   std::string outdir_;
   std::string loaddir_;
-  std::string integrator_;
   MatrixXd input_;
   MatrixXd XY_;
   MatrixXd UV_;
   VectorXd R_;
   int samples_;
-  double dt_;
-  int tsteps_;
   
 };
 

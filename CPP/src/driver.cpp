@@ -12,6 +12,7 @@
 #include "options.hpp"
 #include "options_parser.hpp"
 #include "LagrangianSimulation.h"
+#include "ParticlePhysics.h"
 
 using namespace std;
 using namespace Eigen;
@@ -32,10 +33,14 @@ int main(int argc, char* argv[]) {
 
   // Pass parsed program options to simulation
   LagrangianSimulation simulation(options);
-
+  ParticlePhysics physics(options, simulation);
+  
   // Solve
   simulation.setupInitialConditions();
-  simulation.integrate();
+  physics.simulate();
+
+  // Output
+  simulation.writeXY("final");
   
   return 0;
 }
