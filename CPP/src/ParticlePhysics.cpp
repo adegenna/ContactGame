@@ -13,6 +13,7 @@
 #include <omp.h>
 #include <sys/time.h>
 
+using namespace Eigen;
 namespace po = boost::program_options;
 
 // ***************************************************

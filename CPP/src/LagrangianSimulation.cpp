@@ -7,13 +7,13 @@
 #include <istream>
 #include <random>
 #include <cmath>
-#include <boost/program_options.hpp>
 #include <iostream>
 #include <iterator>
 #include <omp.h>
 #include <sys/time.h>
 
-namespace po = boost::program_options;
+using namespace std;
+using namespace Eigen;
 
 // ***************************************************
 // CLASS FOR LAGRANGIAN COEFFICIENT INFERENCE
