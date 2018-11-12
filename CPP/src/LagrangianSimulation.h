@@ -4,8 +4,6 @@
 #include <Eigen/Dense>
 #include "options.hpp"
 
-using namespace std;
-using namespace Eigen;
 
 // ***************************************************
 // CLASS FOR LAGRANGIAN
@@ -19,13 +17,13 @@ class LagrangianSimulation {
   LagrangianSimulation(Options& options);
   ~LagrangianSimulation();
   void setupInitialConditions();
-  void updateXY(MatrixXd& DXY);
+  void updateXY(Eigen::MatrixXd& DXY);
   void writeXY(std::string append);
-  void incrementUV(MatrixXd& DUV) { UV_ += DUV; }
+  void incrementUV(Eigen::MatrixXd& DUV) { UV_ += DUV; }
   int getSamples() { return samples_; }
-  MatrixXd getXY() { return XY_; }
-  MatrixXd getUV() { return UV_; }
-  VectorXd getR()  { return R_;  }
+  Eigen::MatrixXd getXY() { return XY_; }
+  Eigen::MatrixXd getUV() { return UV_; }
+  Eigen::VectorXd getR()  { return R_;  }
   
  private:
 
@@ -33,10 +31,10 @@ class LagrangianSimulation {
   std::string projdir_;
   std::string outdir_;
   std::string loaddir_;
-  MatrixXd input_;
-  MatrixXd XY_;
-  MatrixXd UV_;
-  VectorXd R_;
+  Eigen::MatrixXd input_;
+  Eigen::MatrixXd XY_;
+  Eigen::MatrixXd UV_;
+  Eigen::VectorXd R_;
   int samples_;
   
 };

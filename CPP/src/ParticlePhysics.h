@@ -5,8 +5,6 @@
 #include "options.hpp"
 #include "LagrangianSimulation.h"
 
-using namespace std;
-using namespace Eigen;
 
 // ***************************************************
 // CLASS FOR PHYSICS
@@ -19,11 +17,11 @@ class ParticlePhysics {
   ParticlePhysics();
   ParticlePhysics(Options& options, LagrangianSimulation& simulation);
   ~ParticlePhysics();
-  void modelContactForces(int i, int j, VectorXd& dij);
+  void modelContactForces(int i, int j, Eigen::VectorXd& dij);
   void particleContact();
   void updateParticleVelocities();
   void calculateParticleMasses();
-  void eulerDXY(MatrixXd& DXY);
+  void eulerDXY(Eigen::MatrixXd& DXY);
   void simulate();
   
  private:
@@ -33,8 +31,8 @@ class ParticlePhysics {
   int tsteps_;
   int samples_;
   int tsave_;
-  MatrixXd forces_;
-  VectorXd mass_;
+  Eigen::MatrixXd forces_;
+  Eigen::VectorXd mass_;
   
   
 };
