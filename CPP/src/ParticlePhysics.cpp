@@ -24,7 +24,7 @@ ParticlePhysics::ParticlePhysics() {
 
 }
 
-ParticlePhysics::ParticlePhysics(Options& o, LagrangianSimulation& simulation) {
+ParticlePhysics::ParticlePhysics(Options& o, LagrangianState& simulation) {
   
   // Parameters
   dt_         = o.dt;

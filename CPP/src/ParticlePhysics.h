@@ -3,7 +3,7 @@
 
 #include <Eigen/Dense>
 #include "options.hpp"
-#include "LagrangianSimulation.h"
+#include "LagrangianState.h"
 
 
 // ***************************************************
@@ -15,7 +15,7 @@ class ParticlePhysics {
  public:
 
   ParticlePhysics();
-  ParticlePhysics(Options& options, LagrangianSimulation& simulation);
+  ParticlePhysics(Options& options, LagrangianState& simulation);
   ~ParticlePhysics();
   void modelContactForces(int i, int j, Eigen::VectorXd& dij);
   void particleContact();
@@ -25,7 +25,7 @@ class ParticlePhysics {
   void simulate();
   
  private:
-  LagrangianSimulation* simulation_;
+  LagrangianState* simulation_;
   double dt_;
   std::string integrator_;
   int tsteps_;

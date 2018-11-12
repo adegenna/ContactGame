@@ -14,7 +14,6 @@ TEST_F(LagrangianTest, testUpdateXY) {
 
   LagrangianSimulation solver(options);
 
-  solver.setupInitialConditions();
   solver.updateXY(DXY_);
   solver.writeXY("final");
 

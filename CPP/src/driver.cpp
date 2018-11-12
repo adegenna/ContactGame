@@ -11,15 +11,12 @@
 #include <boost/program_options.hpp>
 #include "options.hpp"
 #include "options_parser.hpp"
-#include "LagrangianSimulation.h"
+#include "LagrangianState.h"
 #include "ParticlePhysics.h"
+#include "Inputfile.hpp"
 
 using namespace std;
 using namespace Eigen;
-
-// ***************************************************
-// DRIVER PROGRAM FOR LAGRANGIAN SIMULATION
-// ***************************************************
 
 int main(int argc, char* argv[]) {
   printf("*********** DRIVER PROGRAM FOR LAGRANGIAN PARTICLE SOLVER ***********\n\n");
@@ -31,16 +28,19 @@ int main(int argc, char* argv[]) {
   }
   cout << options << endl;
 
+  // Load state
+  input   = load_csv<MatrixXd>(o.projdir + o.loaddir + o.inputfile);
+  
   // Pass parsed program options to simulation
-  LagrangianSimulation simulation(options);
+  LagrangianState simulation(input);
   ParticlePhysics physics(options, simulation);
   
   // Solve
-  simulation.setupInitialConditions();
   physics.simulate();
 
   // Output
-  simulation.writeXY("final");
+  const std::string filename = projdir + outdir + "XY_final.csv";
+  simulation.writeXY(filename);
   
   return 0;
 }

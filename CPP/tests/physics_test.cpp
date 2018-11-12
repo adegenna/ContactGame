@@ -21,7 +21,6 @@ TEST_F(PhysicsTest, testEulerIntegrator) {
   ParticlePhysics physics(options, simulation);
   
   // Solve
-  simulation.setupInitialConditions();
   physics.simulate();
 
   // Output

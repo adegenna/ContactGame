@@ -1,23 +1,17 @@
-#ifndef __LAGRANGIANSIMULATION_H__
-#define __LAGRANGIANSIMULATION_H__
+#ifndef __LAGRANGIANSTATE_H__
+#define __LAGRANGIANSTATE_H__
 
 #include <Eigen/Dense>
 #include "options.hpp"
 
-
-// ***************************************************
-// CLASS FOR LAGRANGIAN
-// ***************************************************
-
-class LagrangianSimulation {
+class LagrangianState {
 
  public:
 
-  LagrangianSimulation(const Options& options);
-  ~LagrangianSimulation();
-  void setupInitialConditions();
+  LagrangianState(const Options& options);
+  ~LagrangianState();
   void updateXY(const Eigen::MatrixXd& DXY);
-  void writeXY(const std::string& append) const;
+  void writeXY(const std::string& filename) const;
   void incrementUV(const Eigen::MatrixXd& DUV) { UV_ += DUV; }
   int getSamples() { return samples_; }
   const Eigen::MatrixXd& getXY() const { return XY_; }
