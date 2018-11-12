@@ -13,17 +13,16 @@ class LagrangianSimulation {
 
  public:
 
-  LagrangianSimulation();
-  LagrangianSimulation(Options& options);
+  LagrangianSimulation(const Options& options);
   ~LagrangianSimulation();
   void setupInitialConditions();
-  void updateXY(Eigen::MatrixXd& DXY);
-  void writeXY(std::string append);
-  void incrementUV(Eigen::MatrixXd& DUV) { UV_ += DUV; }
+  void updateXY(const Eigen::MatrixXd& DXY);
+  void writeXY(const std::string& append) const;
+  void incrementUV(const Eigen::MatrixXd& DUV) { UV_ += DUV; }
   int getSamples() { return samples_; }
-  Eigen::MatrixXd getXY() { return XY_; }
-  Eigen::MatrixXd getUV() { return UV_; }
-  Eigen::VectorXd getR()  { return R_;  }
+  const Eigen::MatrixXd& getXY() const { return XY_; }
+  const Eigen::MatrixXd& getUV() const { return UV_; }
+  const Eigen::VectorXd& getR()  const { return R_;  }
   
  private:
 
