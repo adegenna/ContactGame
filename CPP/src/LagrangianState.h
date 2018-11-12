@@ -8,7 +8,7 @@ class LagrangianState {
 
  public:
 
-  LagrangianState(const Options& options);
+  LagrangianState(const Eigen::MatrixXd& initialstate);
   ~LagrangianState();
   void updateXY(const Eigen::MatrixXd& DXY);
   void writeXY(const std::string& filename) const;

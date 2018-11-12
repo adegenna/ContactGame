@@ -15,17 +15,13 @@
 using namespace std;
 using namespace Eigen;
 
-LagrangianState::LagrangianState(const MatrixXd& input) {
+LagrangianState::LagrangianState(const MatrixXd& initialstate) {
 
   // Parameters
-  inputfile_  = o.inputfile;
-  projdir_    = o.projDir;
-  outdir_     = o.outDir;
-  loaddir_    = o.loadDir;
-  samples_    = input.rows();
-  XY_         = input.block(0,0,samples_,2);
-  UV_         = input.block(0,2,samples_,2);
-  R_          = input.block(0,4,samples_,1);
+  samples_    = initialstate.rows();
+  XY_         = initialstate.block(0,0,samples_,2);
+  UV_         = initialstate.block(0,2,samples_,2);
+  R_          = initialstate.block(0,4,samples_,1);
 }
 
 LagrangianState::~LagrangianState() {
