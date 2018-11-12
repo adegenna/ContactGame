@@ -22,6 +22,7 @@ bool parseOptions(int argc, char *argv[], Options& options){
     ("dt"               , po::value<double>(&options.dt) , "Set timestep")
     ("integrator"       , po::value<std::string>(&options.integrator) , "Set time integrator type")
     ("tsteps"           , po::value<int>(&options.tsteps)     , "Set number of time steps")
+    ("tsave"            , po::value<int>(&options.tsave)      , "Set checkpoint for saving")
 
     ("config_file"      , po::value<std::string>(&input_file), "Configuration input file.")
   ;

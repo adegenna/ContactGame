@@ -29,6 +29,7 @@ ParticlePhysics::ParticlePhysics(Options& o, LagrangianSimulation& simulation) {
   dt_         = o.dt;
   integrator_ = o.integrator;
   tsteps_     = o.tsteps;
+  tsave_      = o.tsave;
   // Simulation
   simulation_ = &simulation;
   
@@ -54,8 +55,8 @@ void ParticlePhysics::modelContactForces(int i, int j, VectorXd& dij) {
   double F     = pow(10.0,5.0)*pow(delta,0.85);
   VectorXd eij = dij/distance_ij;
   // Update forces
-  forces_.row(i) -= F*eij;
-  forces_.row(j) += F*eij;
+  forces_(i,0) -= F*eij(0); forces_(i,1) -= F*eij(1);
+  forces_(j,0) += F*eij(0); forces_(j,1) += F*eij(1);
 
 }
 
@@ -95,8 +96,8 @@ void ParticlePhysics::calculateParticleMasses() {
 void ParticlePhysics::updateParticleVelocities() {  
   double diff   = 0.7;
   MatrixXd DUV(samples_,2);
-  DUV.block(0,0,samples_,1) = diff*dt_*(forces_.array()/mass_.array());
-  DUV.block(0,1,samples_,1) = diff*dt_*(forces_.array()/mass_.array());
+  DUV.col(0) = diff*dt_*(forces_.col(0).array()/mass_.array());
+  DUV.col(1) = diff*dt_*(forces_.col(1).array()/mass_.array());
   simulation_->incrementUV(DUV);
   
 }
@@ -104,9 +105,9 @@ void ParticlePhysics::updateParticleVelocities() {
 void ParticlePhysics::simulate() {
   MatrixXd DXY;
   samples_ = simulation_->getSamples();
-  forces_.resize(samples_);
   calculateParticleMasses();
   for (int i=0; i<tsteps_; i++) {
+    forces_ = MatrixXd::Zero(samples_,2);
     // Calculate contacts and forces
     particleContact();
     // Convert forces to acceleration
@@ -115,6 +116,8 @@ void ParticlePhysics::simulate() {
     eulerDXY(DXY);
     // Update state
     simulation_->updateXY(DXY);
+    if ( (i+1)%tsave_ == 0)
+      simulation_->writeXY(std::to_string(i+1));
   }
 
 }

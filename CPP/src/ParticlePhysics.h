@@ -32,8 +32,10 @@ class ParticlePhysics {
   std::string integrator_;
   int tsteps_;
   int samples_;
-  VectorXd forces_;
+  int tsave_;
+  MatrixXd forces_;
   VectorXd mass_;
+  
   
 };
 

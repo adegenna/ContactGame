@@ -10,7 +10,8 @@ struct Options {
   double dt;
   std::string integrator;
   int tsteps;
-
+  int tsave;
+  
 };
 
 inline std::ostream& operator <<(std::ostream& os, const Options& o){
@@ -20,7 +21,8 @@ inline std::ostream& operator <<(std::ostream& os, const Options& o){
     << "inputfile  = " << o.inputfile << std::endl
     << "dt         = " << o.dt        << std::endl
     << "integrator = " << o.integrator << std::endl
-    << "tsteps     = " << o.tsteps     << std::endl;
+    << "tsteps     = " << o.tsteps     << std::endl
+    << "tsave      = " << o.tsave      << std::endl;
 
    return os;
 }
