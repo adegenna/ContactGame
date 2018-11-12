@@ -27,6 +27,9 @@ ParticlePhysics::ParticlePhysics() {
 ParticlePhysics::ParticlePhysics(Options& o, LagrangianState& simulation) {
   
   // Parameters
+  projdir_    = o.projDir;
+  outdir_     = o.outDir;
+  loaddir_    = o.loadDir;
   dt_         = o.dt;
   integrator_ = o.integrator;
   tsteps_     = o.tsteps;
@@ -117,8 +120,10 @@ void ParticlePhysics::simulate() {
     eulerDXY(DXY);
     // Update state
     simulation_->updateXY(DXY);
-    if ( (i+1)%tsave_ == 0)
-      simulation_->writeXY(std::to_string(i+1));
+    if ( (i+1)%tsave_ == 0) {
+      const std::string filename = projdir_ + outdir_ + "XY_" + std::to_string(i+1) + ".csv";
+      simulation_->writeXY(filename);
+    }
   }
 
 }

@@ -33,7 +33,9 @@ class ParticlePhysics {
   int tsave_;
   Eigen::MatrixXd forces_;
   Eigen::VectorXd mass_;
-  
+  std::string projdir_;
+  std::string outdir_;
+  std::string loaddir_;
   
 };
 
