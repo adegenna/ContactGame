@@ -19,11 +19,7 @@ using namespace Eigen;
 // CLASS FOR LAGRANGIAN COEFFICIENT INFERENCE
 // ***************************************************
 
-LagrangianSimulation::LagrangianSimulation() {
-
-}
-
-LagrangianSimulation::LagrangianSimulation(Options& o) {
+LagrangianSimulation::LagrangianSimulation(const Options& o) {
 
   // Parameters
   inputfile_  = o.inputfile;
@@ -46,12 +42,12 @@ void LagrangianSimulation::setupInitialConditions() {
   
 }
 
-void LagrangianSimulation::updateXY(MatrixXd& DXY) {
+void LagrangianSimulation::updateXY(const MatrixXd& DXY) {
   XY_ += DXY;
 
 }
 
-void LagrangianSimulation::writeXY(std::string append) {
+void LagrangianSimulation::writeXY(const std::string& append) const {
   const static IOFormat CSVFormat(StreamPrecision, DontAlignCols, ", ", "\n");
   ofstream xyout(projdir_ + outdir_ + "XY_" + append + ".csv");
   xyout << XY_.format(CSVFormat);
