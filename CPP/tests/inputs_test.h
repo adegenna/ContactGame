@@ -3,7 +3,7 @@
 
 #include "gtest/gtest.h"
 #include "math.h"
-#include <eigen/Eigen/Dense>
+#include <Eigen/Dense>
 
 class InputsTest: public ::testing::Test {
  protected:

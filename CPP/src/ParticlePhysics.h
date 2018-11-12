@@ -1,7 +1,7 @@
 #ifndef __PARTICLEPHYSICS_H__
 #define __PARTICLEPHYSICS_H__
 
-#include <eigen/Eigen/Dense>
+#include <Eigen/Dense>
 #include "options.hpp"
 #include "LagrangianSimulation.h"
 

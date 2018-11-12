@@ -7,7 +7,7 @@
 #include <istream>
 #include <random>
 #include <cmath>
-#include <eigen/Eigen/Dense>
+#include <Eigen/Dense>
 #include <boost/program_options.hpp>
 #include "options.hpp"
 #include "options_parser.hpp"

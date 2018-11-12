@@ -1,4 +1,4 @@
-#include <eigen/Eigen/Dense>
+#include <Eigen/Dense>
 #include <vector>
 #include <fstream>
 
