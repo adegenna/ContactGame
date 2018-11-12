@@ -19,14 +19,21 @@ class ParticlePhysics {
   ParticlePhysics();
   ParticlePhysics(Options& options, LagrangianSimulation& simulation);
   ~ParticlePhysics();
+  void modelContactForces(int i, int j, VectorXd& dij);
+  void particleContact();
+  void updateParticleVelocities();
+  void calculateParticleMasses();
   void eulerDXY(MatrixXd& DXY);
   void simulate();
   
  private:
-  LagrangianSimulation simulation_;
+  LagrangianSimulation* simulation_;
   double dt_;
   std::string integrator_;
   int tsteps_;
+  int samples_;
+  VectorXd forces_;
+  VectorXd mass_;
   
 };
 

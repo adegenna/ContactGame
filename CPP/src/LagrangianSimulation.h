@@ -21,8 +21,11 @@ class LagrangianSimulation {
   void setupInitialConditions();
   void updateXY(MatrixXd& DXY);
   void writeXY(std::string append);
+  void incrementUV(MatrixXd& DUV) { UV_ += DUV; }
   int getSamples() { return samples_; }
-  MatrixXd getUV() { return UV_; } 
+  MatrixXd getXY() { return XY_; }
+  MatrixXd getUV() { return UV_; }
+  VectorXd getR()  { return R_;  }
   
  private:
 
