@@ -3,6 +3,7 @@ project(lagrangiansolver)
 
 find_package(Boost COMPONENTS program_options REQUIRED)
 find_package(GTest REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(Threads)
 
 add_definitions( -std=c++11 -c -pg -g -DBOOST_LOG_DYN_LINK -DNDEBUG -O3 )
@@ -10,7 +11,7 @@ add_definitions( -std=c++11 -c -pg -g -DBOOST_LOG_DYN_LINK -DNDEBUG -O3 )
 include_directories( ${CMAKE_SOURCE_DIR}
                      ${Boost_INCLUDE_DIRS}
                      ${GTEST_INCLUDE_DIRS}
-		     /usr/local/include/eigen/
+                     ${EIGEN3_INCLUDE_DIR}
 )
 
 add_executable( testall

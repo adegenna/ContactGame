@@ -1,7 +1,7 @@
 #ifndef __LAGRANGIANSIMULATION_H__
 #define __LAGRANGIANSIMULATION_H__
 
-#include <eigen/Eigen/Dense>
+#include <Eigen/Dense>
 #include "options.hpp"
 
 using namespace std;

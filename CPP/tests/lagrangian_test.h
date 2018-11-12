@@ -3,7 +3,7 @@
 
 #include "gtest/gtest.h"
 #include "math.h"
-#include <eigen/Eigen/Dense>
+#include <Eigen/Dense>
 
 class LagrangianTest: public ::testing::Test {
  protected:
