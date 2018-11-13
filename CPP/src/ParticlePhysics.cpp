@@ -16,10 +16,6 @@
 using namespace Eigen;
 namespace po = boost::program_options;
 
-// ***************************************************
-// CLASS FOR PARTICLEPHYSICS
-// ***************************************************
-
 ParticlePhysics::ParticlePhysics() {
 
 }
@@ -71,7 +67,7 @@ void ParticlePhysics::particleContact() {
   VectorXd R  = simulation_->getR();
   VectorXd dij(2);
   double distance_ij, ui_tangent, uj_tangent;
-  # pragma omp parallel for
+  //# pragma omp parallel for
   for (int i=0; i<samples_; i++) {
     for (int j=i+1; j<samples_; j++) {
       dij         = XY.row(j)-XY.row(i);

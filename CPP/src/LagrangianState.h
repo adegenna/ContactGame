@@ -20,11 +20,6 @@ class LagrangianState {
   
  private:
 
-  std::string inputfile_;
-  std::string projdir_;
-  std::string outdir_;
-  std::string loaddir_;
-  Eigen::MatrixXd input_;
   Eigen::MatrixXd XY_;
   Eigen::MatrixXd UV_;
   Eigen::VectorXd R_;

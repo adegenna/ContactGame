@@ -5,11 +5,6 @@
 #include "options.hpp"
 #include "LagrangianState.h"
 
-
-// ***************************************************
-// CLASS FOR PHYSICS
-// ***************************************************
-
 class ParticlePhysics {
 
  public:
