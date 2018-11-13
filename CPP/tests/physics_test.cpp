@@ -1,7 +1,7 @@
 #include <boost/program_options.hpp>
 #include "physics_test.h"
 #include "../src/Inputfile.hpp"
-#include "../src/LagrangianSimulation.h"
+#include "../src/LagrangianState.h"
 #include "../src/ParticlePhysics.h"
 
 using namespace Eigen;
@@ -17,7 +17,7 @@ TEST_F(PhysicsTest, testEulerIntegrator) {
   options.tsteps    = 10;
   
   // Setup
-  LagrangianSimulation simulation(options);
+  LagrangianState simulation(load_csv<MatrixXd>(options.projDir + options.loadDir + options.inputfile));
   ParticlePhysics physics(options, simulation);
   
   // Solve
