@@ -20,6 +20,8 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+add_definitions( -DSRCDIR=\"${CMAKE_SOURCE_DIR}/\")
+
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -Werror=reorder")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g -DBOOST_LOG_DYN_LINK -DNDEBUG")
 
