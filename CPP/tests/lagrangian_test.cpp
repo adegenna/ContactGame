@@ -7,19 +7,17 @@ using namespace Eigen;
 
 TEST_F(LagrangianTest, testUpdateXY) {
   Options options;
-  options.projDir   = "/home/adegennaro/ContactGame/CPP/";
-  options.outDir    = "tests/";
-  options.loadDir   = "tests/";
-  options.inputfile = "testinput.csv";
+  options.inputfile  = std::string(SRCDIR)+"tests/testinput.csv";
+  options.outputfile = "final.csv";
 
-  LagrangianState solver(load_csv<MatrixXd>(options.projDir + options.loadDir + options.inputfile));
+  LagrangianState solver(load_csv<MatrixXd>(options.inputfile));
 
   solver.updateXY(DXY_);
-  solver.writeXY("final");
+  solver.writeXY(options.outputfile);
 
   // Read the output
   MatrixXd out;
-  out   = load_csv<MatrixXd>(options.projDir + options.outDir + "XY_final.csv");
+  out   = load_csv<MatrixXd>(options.outputfile);
   
   ASSERT_TRUE(out.isApprox(X_+DXY_));
   

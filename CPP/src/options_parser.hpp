@@ -15,10 +15,8 @@ bool parseOptions(int argc, char *argv[], Options& options){
   po::options_description desc("Allowed options");
   desc.add_options()
     ("help", "produce help message")
-    ("projDir"          , po::value<std::string>(&options.projDir)   , "Set project directory")
-    ("outDir"           , po::value<std::string>(&options.outDir)    , "Set output directory")    
-    ("loadDir"          , po::value<std::string>(&options.loadDir)   , "Set load directory")    
     ("inputfile"        , po::value<std::string>(&options.inputfile) , "Set input filename")
+    ("outputfile"       , po::value<std::string>(&options.outputfile) , "Set output filename")
     ("dt"               , po::value<double>(&options.dt) , "Set timestep")
     ("integrator"       , po::value<std::string>(&options.integrator) , "Set time integrator type")
     ("tsteps"           , po::value<int>(&options.tsteps)     , "Set number of time steps")

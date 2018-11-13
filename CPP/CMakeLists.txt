@@ -14,6 +14,7 @@ if (OPENMP_FOUND)
 endif()
 
 add_definitions( -std=c++11 -c -pg -g -DBOOST_LOG_DYN_LINK -DNDEBUG -O3 )
+add_definitions( -DSRCDIR=\"${CMAKE_SOURCE_DIR}/\")
 
 include_directories( ${CMAKE_SOURCE_DIR}
                      ${Boost_INCLUDE_DIRS}

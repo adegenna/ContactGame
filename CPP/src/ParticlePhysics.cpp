@@ -16,23 +16,9 @@
 using namespace Eigen;
 namespace po = boost::program_options;
 
-ParticlePhysics::ParticlePhysics() {
-
-}
-
-ParticlePhysics::ParticlePhysics(Options& o, LagrangianState& simulation) {
-  
-  // Parameters
-  projdir_    = o.projDir;
-  outdir_     = o.outDir;
-  loaddir_    = o.loadDir;
-  dt_         = o.dt;
-  integrator_ = o.integrator;
-  tsteps_     = o.tsteps;
-  tsave_      = o.tsave;
-  // Simulation
-  simulation_ = &simulation;
-  
+ParticlePhysics::ParticlePhysics(Options& o, LagrangianState& simulation)
+  : options_(o), simulation_(&simulation)
+{
 }
 
 ParticlePhysics::~ParticlePhysics() {
@@ -41,8 +27,7 @@ ParticlePhysics::~ParticlePhysics() {
 
 void ParticlePhysics::eulerDXY(MatrixXd& DXY) {
   MatrixXd UV = simulation_->getUV();
-  DXY.resize(samples_,2);
-  DXY = UV*dt_;
+  DXY = UV*options_.dt;
 
 }
 
@@ -96,8 +81,8 @@ void ParticlePhysics::calculateParticleMasses() {
 void ParticlePhysics::updateParticleVelocities() {  
   double diff   = 0.7;
   MatrixXd DUV(samples_,2);
-  DUV.col(0) = diff*dt_*(forces_.col(0).array()/mass_.array());
-  DUV.col(1) = diff*dt_*(forces_.col(1).array()/mass_.array());
+  DUV.col(0) = diff*options_.dt*(forces_.col(0).array()/mass_.array());
+  DUV.col(1) = diff*options_.dt*(forces_.col(1).array()/mass_.array());
   simulation_->incrementUV(DUV);
   
 }
@@ -106,7 +91,7 @@ void ParticlePhysics::simulate() {
   MatrixXd DXY;
   samples_ = simulation_->getSamples();
   calculateParticleMasses();
-  for (int i=0; i<tsteps_; i++) {
+  for (int i=0; i<options_.tsteps; i++) {
     forces_ = MatrixXd::Zero(samples_,2);
     // Calculate contacts and forces
     particleContact();
@@ -116,9 +101,8 @@ void ParticlePhysics::simulate() {
     eulerDXY(DXY);
     // Update state
     simulation_->updateXY(DXY);
-    if ( (i+1)%tsave_ == 0) {
-      const std::string filename = projdir_ + outdir_ + "XY_" + std::to_string(i+1) + ".csv";
-      simulation_->writeXY(filename);
+    if ( (i+1)%options_.tsave == 0) {
+      simulation_->writeXY(options_.outputfile+"_"+std::to_string(i)+".csv");
     }
   }
 

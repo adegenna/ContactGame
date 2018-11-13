@@ -9,26 +9,24 @@ using namespace Eigen;
 TEST_F(PhysicsTest, testEulerIntegrator) {
 
   Options options;
-  options.projDir   = "/home/adegennaro/ContactGame/CPP/";
-  options.outDir    = "tests/";
-  options.loadDir   = "tests/";
-  options.inputfile = "testinput.csv";
-  options.dt        = 0.1;
-  options.tsteps    = 10;
+  options.inputfile  = std::string(SRCDIR)+"tests/testinput.csv";
+  options.outputfile = "final.csv";
+  options.dt         = 0.1;
+  options.tsteps     = 10;
   
   // Setup
-  LagrangianState simulation(load_csv<MatrixXd>(options.projDir + options.loadDir + options.inputfile));
+  LagrangianState simulation(load_csv<MatrixXd>(options.inputfile));
   ParticlePhysics physics(options, simulation);
   
   // Solve
   physics.simulate();
 
   // Output
-  simulation.writeXY("final");
+  simulation.writeXY(options.outputfile);
   
   // Read the output
   MatrixXd out;
-  out   = load_csv<MatrixXd>(options.projDir + options.outDir + "XY_final.csv");
+  out   = load_csv<MatrixXd>(options.outputfile);
   
   ASSERT_TRUE(out.isApprox(Xfinal_));
   
