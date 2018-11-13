@@ -1,7 +1,7 @@
 #include <boost/program_options.hpp>
 #include "lagrangian_test.h"
 #include "../src/Inputfile.hpp"
-#include "../src/LagrangianSimulation.h"
+#include "../src/LagrangianState.h"
 
 using namespace Eigen;
 
@@ -12,7 +12,7 @@ TEST_F(LagrangianTest, testUpdateXY) {
   options.loadDir   = "tests/";
   options.inputfile = "testinput.csv";
 
-  LagrangianSimulation solver(options);
+  LagrangianState solver(load_csv<MatrixXd>(options.projDir + options.loadDir + options.inputfile));
 
   solver.updateXY(DXY_);
   solver.writeXY("final");
