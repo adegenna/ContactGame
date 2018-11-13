@@ -13,8 +13,15 @@ if (OPENMP_FOUND)
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
-add_definitions( -std=c++11 -c -pg -g -DBOOST_LOG_DYN_LINK -DNDEBUG -O3 )
-add_definitions( -DSRCDIR=\"${CMAKE_SOURCE_DIR}/\")
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -Werror=reorder")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g -DBOOST_LOG_DYN_LINK -DNDEBUG")
 
 include_directories( ${CMAKE_SOURCE_DIR}
                      ${Boost_INCLUDE_DIRS}

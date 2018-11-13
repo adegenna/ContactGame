@@ -26,16 +26,15 @@ ParticlePhysics::~ParticlePhysics() {
 }
 
 void ParticlePhysics::eulerDXY(MatrixXd& DXY) {
-  MatrixXd UV = simulation_->getUV();
+  const MatrixXd& UV = simulation_->getUV();
   DXY = UV*options_.dt;
-
 }
 
 void ParticlePhysics::modelContactForces(int i, int j, VectorXd& dij) {
   // Potential function for collision force calculation
   double distance_ij = dij.norm();
   double eps   = 0.001;
-  VectorXd R   = simulation_->getR();
+  const VectorXd& R = simulation_->getR();
   double delta = std::min( std::abs((R(i)+R(j))-distance_ij) , eps*(R(i)+R(j)) );
   double F     = pow(10.0,5.0)*pow(delta,0.85);
   VectorXd eij = dij/distance_ij;
@@ -47,9 +46,9 @@ void ParticlePhysics::modelContactForces(int i, int j, VectorXd& dij) {
 
 void ParticlePhysics::particleContact() {
   // Calculate all particle-particle contacts (N^2 brute force)
-  MatrixXd XY = simulation_->getXY();
-  MatrixXd UV = simulation_->getUV();
-  VectorXd R  = simulation_->getR();
+  const MatrixXd& XY = simulation_->getXY();
+  const MatrixXd& UV = simulation_->getUV();
+  const VectorXd& R  = simulation_->getR();
   VectorXd dij(2);
   double distance_ij, ui_tangent, uj_tangent;
   //# pragma omp parallel for
@@ -73,7 +72,7 @@ void ParticlePhysics::calculateParticleMasses() {
   // Assume all particles have the same density
   double rho = 1.0;
   mass_.resize(samples_);
-  VectorXd R = simulation_->getR();
+  const VectorXd& R = simulation_->getR();
   mass_ = rho*0.5*M_PI*R.array().pow(2);
   
 }
