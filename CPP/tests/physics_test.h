@@ -8,10 +8,11 @@
 class PhysicsTest: public ::testing::Test {
  protected:
   virtual void SetUp() {
-    Xfinal_.resize(3,2);
-    Xfinal_ << 1.1, 2.2,
-      3.3, 4.4,
-      5.5, 6.6;
+    Xfinal_.resize(4,2);
+    Xfinal_ << 11.0, 11.0,
+      -11.0, 11.0,
+      -11.0, -11.0,
+      11.0, -11.0;
   }
 
   Eigen::MatrixXd Xfinal_;

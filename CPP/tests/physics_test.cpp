@@ -13,6 +13,7 @@ TEST_F(PhysicsTest, testEulerIntegrator) {
   options.outputfile = "final.csv";
   options.dt         = 0.1;
   options.tsteps     = 10;
+  options.tsave      = 20;
   
   // Setup
   LagrangianState simulation(load_csv<MatrixXd>(options.inputfile));
