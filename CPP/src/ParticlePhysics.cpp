@@ -101,7 +101,7 @@ void ParticlePhysics::simulate() {
     // Update state
     simulation_->updateXY(DXY);
     if ( (i+1)%options_.tsave == 0) {
-      simulation_->writeXY(options_.outputfile+"_"+std::to_string(i)+".csv");
+      simulation_->writeXY(options_.outputfile+"_"+std::to_string(i+1)+".csv");
     }
   }
 

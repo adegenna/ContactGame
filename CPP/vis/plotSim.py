@@ -5,8 +5,9 @@ import time
 
 R = 1.0
 testdir = sys.argv[1]
-tsave   = int(sys.argv[2])
-tfinal  = int(sys.argv[3])
+filebase= sys.argv[2]
+tsave   = int(sys.argv[3])
+tfinal  = int(sys.argv[4])
 
 NT    = tfinal/tsave;
 theta = np.linspace(0,2*np.pi,100);
@@ -17,7 +18,7 @@ fig = plt.figure();
 plt.ion();
 plt.show()
 for i in range(NT):
-    xy = np.genfromtxt(testdir + 'XY_' + str(tsave*(i+1)) + '.csv', delimiter=',')
+    xy = np.genfromtxt(testdir + filebase + str(tsave*(i+1)) + '.csv', delimiter=',')
     for j in range(xy.shape[0]):
         plt.plot(xcirc + xy[j,0] , ycirc + xy[j,1] , 'b');
     plt.gca().set_aspect('equal');
