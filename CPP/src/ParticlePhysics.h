@@ -9,7 +9,6 @@ class ParticlePhysics {
 
  public:
 
-  ParticlePhysics();
   ParticlePhysics(Options& options, LagrangianState& simulation);
   ~ParticlePhysics();
   void modelContactForces(int i, int j, Eigen::VectorXd& dij);
@@ -20,17 +19,11 @@ class ParticlePhysics {
   void simulate();
   
  private:
+  const Options options_;
   LagrangianState* simulation_;
-  double dt_;
-  std::string integrator_;
-  int tsteps_;
   int samples_;
-  int tsave_;
   Eigen::MatrixXd forces_;
   Eigen::VectorXd mass_;
-  std::string projdir_;
-  std::string outdir_;
-  std::string loaddir_;
   
 };
 

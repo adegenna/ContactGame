@@ -23,7 +23,6 @@ endif()
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -Werror=reorder")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g -DBOOST_LOG_DYN_LINK -DNDEBUG")
 
-
 include_directories( ${CMAKE_SOURCE_DIR}
                      ${Boost_INCLUDE_DIRS}
                      ${GTEST_INCLUDE_DIRS}

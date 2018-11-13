@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
   cout << options << endl;
 
   // Load state
-  MatrixXd input = load_csv<MatrixXd>(options.projDir + options.loadDir + options.inputfile);
+  MatrixXd input = load_csv<MatrixXd>(options.inputfile);
   
   // Pass parsed program options to simulation
   LagrangianState simulation(input);
@@ -39,8 +39,7 @@ int main(int argc, char* argv[]) {
   physics.simulate();
 
   // Output
-  const std::string filename = options.projDir + options.outDir + "XY_final.csv";
-  simulation.writeXY(filename);
+  simulation.writeXY(options.outputfile+"_final.csv");
   
   return 0;
 }
