@@ -14,7 +14,7 @@ theta = np.linspace(0,2*np.pi,100);
 xcirc = R*np.cos(theta);
 ycirc = R*np.sin(theta);
 
-fig = plt.figure();
+fig = plt.figure(1);
 plt.ion();
 plt.show()
 for i in range(NT):
@@ -27,5 +27,11 @@ for i in range(NT):
     fig.canvas.draw()
     time.sleep(0.01)
     plt.clf()
+
+plt.ioff(); plt.show();
+fig = plt.figure(2);
+for i in range(NT):
+    em = np.genfromtxt(testdir + filebase + "EM_" + str(tsave*(i+1)) + '.csv', delimiter=',')
+    plt.plot(i,em[0],'bo'); plt.plot(i,em[1],'ro'); plt.plot(i,em[2],'go');
 
 plt.show();

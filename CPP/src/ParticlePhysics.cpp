@@ -13,6 +13,7 @@
 #include <omp.h>
 #include <sys/time.h>
 
+using namespace std;
 using namespace Eigen;
 namespace po = boost::program_options;
 
@@ -78,7 +79,7 @@ void ParticlePhysics::calculateParticleMasses() {
 }
 
 void ParticlePhysics::updateParticleVelocities() {  
-  double diff   = 0.7;
+  double diff   = 3.77;//0.7;
   MatrixXd DUV(samples_,2);
   DUV.col(0) = diff*options_.dt*(forces_.col(0).array()/mass_.array());
   DUV.col(1) = diff*options_.dt*(forces_.col(1).array()/mass_.array());
@@ -89,6 +90,8 @@ void ParticlePhysics::updateParticleVelocities() {
 void ParticlePhysics::simulate() {
   MatrixXd DXY;
   samples_ = simulation_->getSamples();
+  double energy;
+  VectorXd momentum(2);
   calculateParticleMasses();
   for (int i=0; i<options_.tsteps; i++) {
     forces_ = MatrixXd::Zero(samples_,2);
@@ -102,7 +105,38 @@ void ParticlePhysics::simulate() {
     simulation_->updateXY(DXY);
     if ( (i+1)%options_.tsave == 0) {
       simulation_->writeXY(options_.outputfile+"_"+std::to_string(i+1)+".csv");
+      energy   = calculateTotalEnergy();
+      momentum = calculateTotalMomentum();
+      writeEnergyAndMomentum(energy,momentum,options_.outputfile+"_EM_"+std::to_string(i+1)+".csv");
     }
   }
+
+}
+
+double ParticlePhysics::calculateTotalEnergy() {
+  double energy = 0.0;
+  MatrixXd UV = simulation_->getUV();
+  for (int i=0; i<samples_; i++)
+    energy += 0.5*mass_(i)*(pow(UV(i,0),2) + pow(UV(i,1),2));
+  return energy;
+      
+}
+
+VectorXd ParticlePhysics::calculateTotalMomentum() {
+  VectorXd momentum(2);
+  momentum(0) = 0.0; momentum(1) = 0.0;
+  MatrixXd UV = simulation_->getUV();
+  for (int i=0; i<samples_; i++) {
+    momentum(0) += mass_(i)*UV(i,0);
+    momentum(1) += mass_(i)*UV(i,1);
+  } 
+  return momentum;
+      
+}
+
+void ParticlePhysics::writeEnergyAndMomentum(double energy, VectorXd& momentum, const std::string& filename) const {
+  ofstream xyout(filename);
+  xyout << energy << ", " << momentum(0) << ", " << momentum(1) << std::endl;
+  xyout.close();
 
 }
