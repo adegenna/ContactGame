@@ -3,6 +3,7 @@
 #include "../src/Inputfile.hpp"
 #include "../src/LagrangianState.h"
 #include "../src/ParticlePhysics.h"
+#include "../src/TimeIntegration.h"
 
 using namespace Eigen;
 
@@ -18,9 +19,10 @@ TEST_F(PhysicsTest, testEulerIntegrator) {
   // Setup
   LagrangianState simulation(load_csv<MatrixXd>(options.inputfile));
   ParticlePhysics physics(options, simulation);
+  TimeIntegration integrator(options, physics, simulation);
   
   // Solve
-  physics.simulate();
+  integrator.euler();
 
   // Output
   simulation.writeXY(options.outputfile);
@@ -45,9 +47,10 @@ TEST_F(PhysicsTest, testBilliards) {
   // Setup
   LagrangianState simulation(load_csv<MatrixXd>(options.inputfile));
   ParticlePhysics physics(options, simulation);
+  TimeIntegration integrator(options, physics, simulation);
   
   // Solve
-  physics.simulate();
+  integrator.euler();
 
   // Output
   simulation.writeXY(options.outputfile);

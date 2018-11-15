@@ -20,15 +20,11 @@ namespace po = boost::program_options;
 ParticlePhysics::ParticlePhysics(Options& o, LagrangianState& simulation)
   : options_(o), simulation_(&simulation)
 {
+  samples_ = simulation_->getSamples();
 }
 
 ParticlePhysics::~ParticlePhysics() {
   
-}
-
-void ParticlePhysics::eulerDXY(MatrixXd& DXY) {
-  const MatrixXd& UV = simulation_->getUV();
-  DXY = UV*options_.dt;
 }
 
 void ParticlePhysics::modelContactForces(int i, int j, VectorXd& dij) {
@@ -87,32 +83,6 @@ void ParticlePhysics::updateParticleVelocities() {
   
 }
 
-void ParticlePhysics::simulate() {
-  MatrixXd DXY;
-  samples_ = simulation_->getSamples();
-  double energy;
-  VectorXd momentum(2);
-  calculateParticleMasses();
-  for (int i=0; i<options_.tsteps; i++) {
-    forces_ = MatrixXd::Zero(samples_,2);
-    // Calculate contacts and forces
-    particleContact();
-    // Convert forces to acceleration
-    updateParticleVelocities();
-    // Advance in time
-    eulerDXY(DXY);
-    // Update state
-    simulation_->updateXY(DXY);
-    if ( (i+1)%options_.tsave == 0) {
-      simulation_->writeXY(options_.outputfile+"_"+std::to_string(i+1)+".csv");
-      energy   = calculateTotalEnergy();
-      momentum = calculateTotalMomentum();
-      writeEnergyAndMomentum(energy,momentum,options_.outputfile+"_EM_"+std::to_string(i+1)+".csv");
-    }
-  }
-
-}
-
 double ParticlePhysics::calculateTotalEnergy() {
   double energy = 0.0;
   MatrixXd UV = simulation_->getUV();
@@ -139,4 +109,8 @@ void ParticlePhysics::writeEnergyAndMomentum(double energy, VectorXd& momentum, 
   xyout << energy << ", " << momentum(0) << ", " << momentum(1) << std::endl;
   xyout.close();
 
+}
+
+void ParticlePhysics::zeroForces() {
+  forces_  = MatrixXd::Zero(samples_,2);
 }

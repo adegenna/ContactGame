@@ -36,6 +36,7 @@ add_executable( testall
   src/Inputfile.hpp
   src/LagrangianState.cpp
   src/ParticlePhysics.cpp
+  src/TimeIntegration.cpp
   tests/inputs_test.cpp
   tests/lagrangian_test.cpp
   tests/physics_test.cpp
@@ -46,6 +47,7 @@ add_executable( solver
   src/Inputfile.hpp
   src/LagrangianState.cpp
   src/ParticlePhysics.cpp
+  src/TimeIntegration.cpp
   src/options.hpp
   src/options_parser.hpp
 )

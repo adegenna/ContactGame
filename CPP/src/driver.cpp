@@ -13,6 +13,7 @@
 #include "options_parser.hpp"
 #include "LagrangianState.h"
 #include "ParticlePhysics.h"
+#include "TimeIntegration.h"
 #include "Inputfile.hpp"
 
 using namespace std;
@@ -32,14 +33,15 @@ int main(int argc, char* argv[]) {
   MatrixXd input = load_csv<MatrixXd>(options.inputfile);
   
   // Pass parsed program options to simulation
-  LagrangianState simulation(input);
-  ParticlePhysics physics(options, simulation);
+  LagrangianState state(input);
+  ParticlePhysics physics(options, state);
+  TimeIntegration integrator(options, physics, state);
   
   // Solve
-  physics.simulate();
+  integrator.euler();
 
   // Output
-  simulation.writeXY(options.outputfile+"_final.csv");
+  state.writeXY(options.outputfile+"_final.csv");
   
   return 0;
 }

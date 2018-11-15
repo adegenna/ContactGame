@@ -15,11 +15,10 @@ class ParticlePhysics {
   void particleContact();
   void updateParticleVelocities();
   void calculateParticleMasses();
-  void eulerDXY(Eigen::MatrixXd& DXY);
-  void simulate();
   double calculateTotalEnergy();
   Eigen::VectorXd calculateTotalMomentum();
   void writeEnergyAndMomentum(double energy, Eigen::VectorXd& momentum, const std::string& filename) const;
+  void zeroForces();
   
  private:
   const Options options_;
