@@ -22,8 +22,8 @@ for i in range(NT):
     for j in range(xy.shape[0]):
         plt.plot(xcirc + xy[j,0] , ycirc + xy[j,1] , 'b');
     plt.gca().set_aspect('equal');
-    plt.xlim([-10,10])
-    plt.ylim([-10,10])
+    plt.xlim([-20,20])
+    plt.ylim([-4,36])
     fig.canvas.draw()
     time.sleep(0.01)
     plt.clf()

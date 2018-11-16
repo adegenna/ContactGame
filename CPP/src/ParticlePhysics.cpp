@@ -31,8 +31,8 @@ ParticlePhysics::~ParticlePhysics() {
 void ParticlePhysics::modelContactForces(int i, int j, VectorXd& dij) {
   // Potential function for collision force calculation
   double distance_ij = dij.norm();
-  double eps   = 0.001;
-  const VectorXd& R = simulation_->getR();
+  double eps         = 0.001;
+  const VectorXd& R  = simulation_->getR();
   double delta = std::min( std::abs((R(i)+R(j))-distance_ij) , eps*(R(i)+R(j)) );
   double F     = pow(10.0,5.0)*pow(delta,0.85);
   VectorXd eij = dij/distance_ij;
@@ -47,16 +47,14 @@ void ParticlePhysics::particleContact() {
   const MatrixXd& XY = simulation_->getXY();
   const MatrixXd& UV = simulation_->getUV();
   const VectorXd& R  = simulation_->getR();
-  VectorXd dij(2);
-  double distance_ij, ui_tangent, uj_tangent;
-  //# pragma omp parallel for
+  # pragma omp parallel for
   for (int i=0; i<samples_; i++) {
     for (int j=i+1; j<samples_; j++) {
-      dij         = XY.row(j)-XY.row(i);
-      distance_ij = dij.norm();
+      VectorXd dij        = XY.row(j)-XY.row(i);
+      double distance_ij  = dij.norm();
       if (distance_ij <= R(i)+R(j)) {
-	ui_tangent = UV.row(i).dot(dij)/distance_ij;
-	uj_tangent = UV.row(j).dot(dij)/distance_ij;
+	double ui_tangent = UV.row(i).dot(dij)/distance_ij;
+	double uj_tangent = UV.row(j).dot(dij)/distance_ij;
 	if ((ui_tangent - uj_tangent) > 0) {
 	  modelContactForces(i,j,dij);
 	}
