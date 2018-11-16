@@ -13,12 +13,12 @@ class ParticlePhysics {
   ~ParticlePhysics();
   void modelContactForces(int i, int j, Eigen::VectorXd& dij);
   void particleContact();
-  void updateParticleVelocities();
   void calculateParticleMasses();
   double calculateTotalEnergy();
   Eigen::VectorXd calculateTotalMomentum();
   void writeEnergyAndMomentum(double energy, Eigen::VectorXd& momentum, const std::string& filename) const;
   void zeroForces();
+  const Eigen::MatrixXd& RHS();
   
  private:
   const Options options_;

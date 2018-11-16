@@ -21,6 +21,7 @@ ParticlePhysics::ParticlePhysics(Options& o, LagrangianState& simulation)
   : options_(o), simulation_(&simulation)
 {
   samples_ = simulation_->getSamples();
+  calculateParticleMasses();
 }
 
 ParticlePhysics::~ParticlePhysics() {
@@ -74,15 +75,6 @@ void ParticlePhysics::calculateParticleMasses() {
   
 }
 
-void ParticlePhysics::updateParticleVelocities() {  
-  double diff   = 3.77;//0.7;
-  MatrixXd DUV(samples_,2);
-  DUV.col(0) = diff*options_.dt*(forces_.col(0).array()/mass_.array());
-  DUV.col(1) = diff*options_.dt*(forces_.col(1).array()/mass_.array());
-  simulation_->incrementUV(DUV);
-  
-}
-
 double ParticlePhysics::calculateTotalEnergy() {
   double energy = 0.0;
   MatrixXd UV = simulation_->getUV();
@@ -113,4 +105,16 @@ void ParticlePhysics::writeEnergyAndMomentum(double energy, VectorXd& momentum, 
 
 void ParticlePhysics::zeroForces() {
   forces_  = MatrixXd::Zero(samples_,2);
+}
+
+const MatrixXd& ParticlePhysics::RHS() {
+  zeroForces();
+  particleContact();
+  double diff   = 3.77;//0.7;
+  for (int i=0; i<samples_; i++) {
+    forces_(i,0) *= diff/mass_(i);
+    forces_(i,1) *= diff/mass_(i);
+  }
+  return forces_;
+  
 }

@@ -28,13 +28,12 @@ TimeIntegration::~TimeIntegration() {
 }
 
 void TimeIntegration::euler() {
-  MatrixXd DXY;
-  int samples = state_->getSamples();
-  physics_->calculateParticleMasses();
+  MatrixXd DUV, DXY;
   for (int i=0; i<options_.tsteps; i++) {
-    physics_->zeroForces();
-    physics_->particleContact();
-    physics_->updateParticleVelocities();
+    // Calculate x_tt = RHS
+    const MatrixXd& rhs = physics_->RHS();
+    DUV = rhs*options_.dt;
+    state_->incrementUV(DUV);
     const MatrixXd& UV = state_->getUV();
     DXY = UV*options_.dt;
     state_->updateXY(DXY);
