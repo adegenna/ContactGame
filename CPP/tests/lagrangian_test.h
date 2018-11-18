@@ -13,7 +13,7 @@ class LagrangianTest: public ::testing::Test {
       -10.0, 10.0, 
       -10.0, -10.0,
       10.0, -10.0;
-    DXY_.resize(3,2);
+    DXY_.resize(4,2);
     DXY_ << 1.0, 1.0,
       -1.0, 1.0,
       -1.0, -1.0,

@@ -40,6 +40,7 @@ add_executable( testall
   tests/inputs_test.cpp
   tests/lagrangian_test.cpp
   tests/physics_test.cpp
+  tests/quadtree_test.cpp
 )
 
 add_executable( solver
