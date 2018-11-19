@@ -8,6 +8,11 @@
 #include <random>
 #include <cmath>
 #include <boost/program_options.hpp>
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point.hpp>
+#include <boost/geometry/geometries/box.hpp>
+#include <boost/geometry/index/rtree.hpp>
+#include <boost/geometry/geometries/register/point.hpp>
 #include <iostream>
 #include <iterator>
 #include <omp.h>
@@ -16,6 +21,10 @@
 using namespace std;
 using namespace Eigen;
 namespace po = boost::program_options;
+namespace bg = boost::geometry;
+namespace bgi = boost::geometry::index;
+
+BOOST_GEOMETRY_REGISTER_POINT_2D(Eigen::Vector2d, double, boost::geometry::cs::cartesian, Eigen::Vector2d::x(), Eigen::Vector2d::y())
 
 ParticlePhysics::ParticlePhysics(Options& o, LagrangianState& simulation)
   : options_(o), simulation_(&simulation)
@@ -28,7 +37,7 @@ ParticlePhysics::~ParticlePhysics() {
   
 }
 
-void ParticlePhysics::modelContactForces(int i, int j, VectorXd& dij) {
+void ParticlePhysics::modelContactForces(int i, int j, Vector2d& dij) {
   // Potential function for collision force calculation
   double distance_ij = dij.norm();
   double eps         = 0.001;
@@ -42,6 +51,44 @@ void ParticlePhysics::modelContactForces(int i, int j, VectorXd& dij) {
 
 }
 
+void ParticlePhysics::particleContactRtree() {
+  // Calculate all particle-particle contacts (N log N)
+  const MatrixXd& XY = simulation_->getXY();
+  const MatrixXd& UV = simulation_->getUV();
+  const VectorXd& R  = simulation_->getR();
+  // Rtree construction
+  typedef std::pair<Vector2d, unsigned> value;
+  MatrixXd XYUVR = load_csv<MatrixXd>(options_.inputfile);
+  bgi::rtree< value, bgi::quadratic<16> > rtree;
+  for (int i=0; i<samples_; i++) {
+    Vector2d xy; xy[0] = XY(i,0); xy[1] = XY(i,1);
+    rtree.insert(std::make_pair(xy,i));
+  }
+  int maxN = std::min(samples_,6);
+  // knn search
+  double epsilon = 1e-8;
+  for (int i=0; i<samples_; i++) {
+    std::vector<value> result_n;
+    Vector2d xy; xy[0] = XY(i,0); xy[1] = XY(i,1);
+    rtree.query(bgi::nearest(xy,maxN), std::back_inserter(result_n));
+    for (int j=0; j<maxN; j++) {
+      const value& v      = result_n[j];
+      int idx             = v.second;
+      Vector2d dij; dij[0] = v.first[0]-XY(i,0); dij[1] = v.first[1]-XY(i,1);
+      double distance_ij  = dij.norm();
+      if ((distance_ij <= R(i)+R(idx)) && (distance_ij > epsilon) ) {
+	double ui_tangent = UV.row(i).dot(dij)/distance_ij;
+	double uj_tangent = UV.row(idx).dot(dij)/distance_ij;
+	if ((ui_tangent - uj_tangent) > 0) {
+	  modelContactForces(i,idx,dij);
+	}
+      }
+    }
+  }
+
+}
+
+
 void ParticlePhysics::particleContact() {
   // Calculate all particle-particle contacts (N^2 brute force)
   const MatrixXd& XY = simulation_->getXY();
@@ -50,7 +97,7 @@ void ParticlePhysics::particleContact() {
   # pragma omp parallel for
   for (int i=0; i<samples_; i++) {
     for (int j=i+1; j<samples_; j++) {
-      VectorXd dij        = XY.row(j)-XY.row(i);
+      Vector2d dij        = XY.row(j)-XY.row(i);
       double distance_ij  = dij.norm();
       if (distance_ij <= R(i)+R(j)) {
 	double ui_tangent = UV.row(i).dot(dij)/distance_ij;

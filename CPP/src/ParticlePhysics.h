@@ -11,8 +11,9 @@ class ParticlePhysics {
 
   ParticlePhysics(Options& options, LagrangianState& simulation);
   ~ParticlePhysics();
-  void modelContactForces(int i, int j, Eigen::VectorXd& dij);
+  void modelContactForces(int i, int j, Eigen::Vector2d& dij);
   void particleContact();
+  void particleContactRtree();
   void calculateParticleMasses();
   double calculateTotalEnergy();
   Eigen::VectorXd calculateTotalMomentum();
