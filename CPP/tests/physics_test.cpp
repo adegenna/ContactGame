@@ -115,16 +115,16 @@ TEST(ContactForceModel, BruteForceEqualsRTree)
 TEST(ContactForceModel, OverlappingInX)
 {
   Eigen::MatrixXd state(2,5);
-  // stationary particle at 0,0 with radius 1
+  // particle at 0,0 with radius 0.51 moving at (1,0)
   state(0,0) = 0;
   state(0,1) = 0;
-  state(0,2) = 0;
+  state(0,2) = 1;
   state(0,3) = 0;
   state(0,4) = 0.51;
-  // stationary particle at 1,0 with radius 1
+  // particle at 1,0 with radius 0.51 moving at (-1,0)
   state(1,0) = 1;
   state(1,1) = 0;
-  state(1,2) = 0;
+  state(1,2) = -1;
   state(1,3) = 0;
   state(1,4) = 0.51;
 
