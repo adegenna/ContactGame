@@ -78,7 +78,7 @@ TEST_F(PhysicsTest, testBilliards) {
   
 }
 
-TEST(ContactForceModel, BruteForceEqualsRTree)
+TEST(ContactForceModel, OverlappingStationaryParticlesHaveZeroForce)
 {
   Eigen::MatrixXd state(2,5);
   // stationary particle at 0,0 with radius 1
@@ -107,8 +107,8 @@ TEST(ContactForceModel, BruteForceEqualsRTree)
   EXPECT_TRUE(forces_brute_force.isApprox(forces_rtree));
   
   Eigen::MatrixXd zero2x2 = Eigen::MatrixXd::Zero(2,2);
-  EXPECT_FALSE(forces_brute_force.isApprox(zero2x2)) << "brute force should not be zero.";
-  EXPECT_FALSE(forces_rtree.isApprox(zero2x2)) << "rtree force should not be zero.";
+  EXPECT_TRUE(forces_brute_force.isApprox(zero2x2)) << "brute force should be zero.";
+  EXPECT_TRUE(forces_rtree.isApprox(zero2x2)) << "rtree force should be zero.";
 }
 
 
@@ -143,5 +143,14 @@ TEST(ContactForceModel, OverlappingInX)
   Eigen::MatrixXd zero2x2 = Eigen::MatrixXd::Zero(2,2);
   EXPECT_FALSE(forces_brute_force.isApprox(zero2x2)) << "brute force should not be zero.";
   EXPECT_FALSE(forces_rtree.isApprox(zero2x2)) << "rtree force should not be zero.";
+
+  Eigen::MatrixXd expected(2,2);
+  expected(0,0) = -286.622;
+  expected(1,0) = 286.622;
+  expected(0,1) = 0;
+  expected(1,1) = 0;
+
+  EXPECT_TRUE(forces_brute_force.isApprox(expected, 0.1));
+  EXPECT_TRUE(forces_rtree.isApprox(expected, 0.1));
 }
 

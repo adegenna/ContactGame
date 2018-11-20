@@ -126,7 +126,7 @@ particleContact(const LagrangianState &simulation,
       const double ui_tangent  = UV.row(i).dot(dij)/distance_ij;
       const double uj_tangent  = UV.row(idx).dot(dij)/distance_ij;
 
-      if ((ui_tangent - uj_tangent) > 0) {
+      if (((ui_tangent - uj_tangent) > 0) && idx > i) {
         const auto local_force = modelContactForces(i,idx,dij,simulation);
 
         forces(i,0)   -= local_force(0);
