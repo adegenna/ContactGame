@@ -73,7 +73,7 @@ TEST_F(PhysicsTest, testBilliards) {
   out   = load_csv<MatrixXd>(options.outputfile);
   out2  = load_csv<MatrixXd>(options_rtree.outputfile);
 
-  ASSERT_TRUE(out.isApprox(out2));
+  EXPECT_LT( (out-out2).norm(), 1.e-1);
 
   
 }
