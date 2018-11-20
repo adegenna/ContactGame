@@ -26,10 +26,15 @@ namespace bgi = boost::geometry::index;
 
 BOOST_GEOMETRY_REGISTER_POINT_2D(Eigen::Vector2d, double, boost::geometry::cs::cartesian, Eigen::Vector2d::x(), Eigen::Vector2d::y())
 
-ParticlePhysics::ParticlePhysics(Options& o, LagrangianState& simulation)
+ParticlePhysics::ParticlePhysics(Options& o, LagrangianState& simulation, bool useRtree)
   : options_(o), simulation_(&simulation)
 {
   samples_ = simulation_->getSamples();
+  if (useRtree){
+    contact_model_ = std::make_unique<RTreeContactForceModel>();
+  } else {
+    contact_model_ = std::make_unique<BruteForceContactForceModel>();
+  }
   calculateParticleMasses();
 }
 
@@ -37,83 +42,138 @@ ParticlePhysics::~ParticlePhysics() {
   
 }
 
-void ParticlePhysics::modelContactForces(int i, int j, Vector2d& dij) {
-  // Potential function for collision force calculation
-  double distance_ij = dij.norm();
-  double eps         = 0.001;
-  const VectorXd& R  = simulation_->getR();
-  double delta = std::min( std::abs((R(i)+R(j))-distance_ij) , eps*(R(i)+R(j)) );
-  double F     = pow(10.0,5.0)*pow(delta,0.85);
-  VectorXd eij = dij/distance_ij;
-  // Update forces
-  forces_(i,0) -= F*eij(0); forces_(i,1) -= F*eij(1);
-  forces_(j,0) += F*eij(0); forces_(j,1) += F*eij(1);
 
-}
-
-void ParticlePhysics::particleContactRtree() {
-  // Calculate all particle-particle contacts (N log N)
-  const MatrixXd& XY = simulation_->getXY();
-  const MatrixXd& UV = simulation_->getUV();
-  const VectorXd& R  = simulation_->getR();
-  // Rtree construction
-  typedef std::pair<Vector2d, unsigned> value;
-  bgi::rtree< value, bgi::quadratic<16> > rtree;
-  for (int i=0; i<samples_; i++) {
-    Vector2d xy; xy[0] = XY(i,0); xy[1] = XY(i,1);
-    rtree.insert(std::make_pair(xy,i));
-  }
-  int maxN = std::min(samples_,6);
-  // knn search
-  double epsilon = 1e-8;
-  initializeParticleInteractionTracker();
-  for (int i=0; i<samples_; i++) {
-    std::vector<value> result_n;
-    Vector2d xy; xy[0] = XY(i,0); xy[1] = XY(i,1);
-    rtree.query(bgi::nearest(xy,maxN), std::back_inserter(result_n));
-    for (int j=0; j<maxN; j++) {
-      const value& v      = result_n[j];
-      int idx             = v.second;
-      Vector2d dij; dij[0] = v.first[0]-XY(i,0); dij[1] = v.first[1]-XY(i,1);
-      double distance_ij  = dij.norm();
-      if ((interactions_(i,idx) == 0) || (interactions_(idx,i) == 0)) {
-	double ui_tangent = UV.row(i).dot(dij)/distance_ij;
-	double uj_tangent = UV.row(idx).dot(dij)/distance_ij;
-	if ((ui_tangent - uj_tangent) > 0) {
-	  modelContactForces(i,idx,dij);
-	}
-	interactions_(i,idx) = 1;
-	interactions_(idx,i) = 1;
-      }      
-    }
-  }
-}
+//void ParticlePhysics::particleContactRtree() {
+//  // Calculate all particle-particle contacts (N log N)
+//  const MatrixXd& XY = simulation_->getXY();
+//  const MatrixXd& UV = simulation_->getUV();
+//  const VectorXd& R  = simulation_->getR();
+//  // Rtree construction
+//  typedef std::pair<Vector2d, unsigned> value;
+//  bgi::rtree< value, bgi::quadratic<16> > rtree;
+//  for (int i=0; i<samples_; i++) {
+//    Vector2d xy; xy[0] = XY(i,0); xy[1] = XY(i,1);
+//    rtree.insert(std::make_pair(xy,i));
+//  }
+//  int maxN = std::min(samples_,6);
+//  // knn search
+//  double epsilon = 1e-8;
+//  initializeParticleInteractionTracker();
+//  for (int i=0; i<samples_; i++) {
+//    std::vector<value> result_n;
+//    Vector2d xy; xy[0] = XY(i,0); xy[1] = XY(i,1);
+//    rtree.query(bgi::nearest(xy,maxN), std::back_inserter(result_n));
+//    for (int j=0; j<maxN; j++) {
+//      const value& v      = result_n[j];
+//      int idx             = v.second;
+//      Vector2d dij; dij[0] = v.first[0]-XY(i,0); dij[1] = v.first[1]-XY(i,1);
+//      double distance_ij  = dij.norm();
+//      if ((interactions_(i,idx) == 0) && (interactions_(idx,i) == 0)) {
+//	double ui_tangent = UV.row(i).dot(dij)/distance_ij;
+//	double uj_tangent = UV.row(idx).dot(dij)/distance_ij;
+//	if ((ui_tangent - uj_tangent) > 0) {
+//	  modelContactForces(i,idx,dij);
+//	}
+//	interactions_(i,idx) = 1;
+//	interactions_(idx,i) = 1;
+//      }
+//    }
+//  }
+//}
 
 void ParticlePhysics::initializeParticleInteractionTracker() {
   interactions_ = MatrixXi::Zero(samples_,samples_);
 }
 
-void ParticlePhysics::particleContact() {
+
+
+void
+BruteForceContactForceModel::
+particleContact(const LagrangianState &simulation,
+                Eigen::MatrixXd &forces)
+{
   // Calculate all particle-particle contacts (N^2 brute force)
-  const MatrixXd& XY = simulation_->getXY();
-  const MatrixXd& UV = simulation_->getUV();
-  const VectorXd& R  = simulation_->getR();
-  # pragma omp parallel for
-  for (int i=0; i<samples_; i++) {
-    for (int j=i+1; j<samples_; j++) {
+  const MatrixXd& XY = simulation.getXY();
+  const MatrixXd& UV = simulation.getUV();
+  const VectorXd& R  = simulation.getR();
+  const int samples  = simulation.getSamples();
+
+  forces.resizeLike(XY);
+
+# pragma omp parallel for
+  for (int i=0; i<samples; i++) {
+    for (int j=i+1; j<samples; j++) {
       Vector2d dij        = XY.row(j)-XY.row(i);
       double distance_ij  = dij.norm();
       if (distance_ij <= R(i)+R(j)) {
-	double ui_tangent = UV.row(i).dot(dij)/distance_ij;
-	double uj_tangent = UV.row(j).dot(dij)/distance_ij;
-	if ((ui_tangent - uj_tangent) > 0) {
-	  modelContactForces(i,j,dij);
-	}
+        double ui_tangent = UV.row(i).dot(dij)/distance_ij;
+        double uj_tangent = UV.row(j).dot(dij)/distance_ij;
+        if ((ui_tangent - uj_tangent) > 0) {
+          const auto local_force = modelContactForces(i,j,dij,simulation);
+
+          forces(i,0) -= local_force(0);
+          forces(i,1) -= local_force(1);
+          forces(j,0) += local_force(0);
+          forces(j,1) += local_force(1);
+        }
       }
     }
   }
-
 }
+
+
+void
+RTreeContactForceModel::
+particleContact(const LagrangianState &simulation,
+                Eigen::MatrixXd &forces)
+{
+  const MatrixXd& XY = simulation.getXY();
+  const MatrixXd& UV = simulation.getUV();
+  const VectorXd& R  = simulation.getR();
+  const int samples  = simulation.getSamples();
+
+  forces.resizeLike(XY);
+
+  // Rtree construction
+  typedef std::pair<Vector2d, unsigned> value;
+  bgi::rtree< value, bgi::quadratic<16> > rtree;
+  for (int i=0; i<samples; i++) {
+    rtree.insert(std::make_pair(Vector2d(XY(i,0), XY(i,1)), i));
+  }
+
+
+  for (int i=0; i<samples; i++) {
+
+    std::vector<value> contact_points;
+    const Vector2d search_point(XY(i,0), XY(i,1));
+
+    // rtree search using a lambda function that returns true for the distance
+    // between the points less than the sum of their radii.
+    rtree.query(bgi::satisfies([&](value const& v) {
+      return bg::distance(v.first, search_point) <= R(i)+R(v.second); }),
+      std::back_inserter(contact_points));
+
+    for (const auto& found_point : contact_points){
+      const int idx = found_point.second;
+      const Vector2d dij( found_point.first[0] - XY(i,0),
+                          found_point.first[1] - XY(i,1) );
+
+      const double distance_ij = dij.norm();
+      const double ui_tangent  = UV.row(i).dot(dij)/distance_ij;
+      const double uj_tangent  = UV.row(idx).dot(dij)/distance_ij;
+
+      if ((ui_tangent - uj_tangent) > 0) {
+        const auto local_force = modelContactForces(i,idx,dij,simulation);
+
+        forces(i,0)   -= local_force(0);
+        forces(i,1)   -= local_force(1);
+        forces(idx,0) += local_force(0);
+        forces(idx,1) += local_force(1);
+      }
+    }
+  }
+}
+
 
 void ParticlePhysics::calculateParticleMasses() {
   // Assume all particles have the same density
@@ -158,7 +218,8 @@ void ParticlePhysics::zeroForces() {
 
 const MatrixXd& ParticlePhysics::RHS() {
   zeroForces();
-  particleContactRtree();
+//  particleContactRtree();
+  contact_model_->particleContact(*simulation_, forces_);
   double diff   = 3.77;//0.7;
   for (int i=0; i<samples_; i++) {
     forces_(i,0) *= diff/mass_(i);
