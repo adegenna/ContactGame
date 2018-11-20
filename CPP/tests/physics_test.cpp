@@ -104,8 +104,11 @@ TEST(ContactForceModel, BruteForceEqualsRTree)
   std::cout << "brute force:\n" << forces_brute_force
             << "\nrtree force:\n" << forces_rtree << "\n";
 
-  ASSERT_TRUE(forces_brute_force.isApprox(forces_rtree));
-            
+  EXPECT_TRUE(forces_brute_force.isApprox(forces_rtree));
+  
+  Eigen::MatrixXd zero2x2 = Eigen::MatrixXd::Zero(2,2);
+  EXPECT_FALSE(forces_brute_force.isApprox(zero2x2)) << "brute force should not be zero.";
+  EXPECT_FALSE(forces_rtree.isApprox(zero2x2)) << "rtree force should not be zero.";
 }
 
 

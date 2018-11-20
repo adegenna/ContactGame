@@ -61,6 +61,7 @@ particleContact(const LagrangianState &simulation,
   const int samples  = simulation.getSamples();
 
   forces.resizeLike(XY);
+  forces.array() = 0;
 
 # pragma omp parallel for
   for (int i=0; i<samples; i++) {
@@ -95,6 +96,7 @@ particleContact(const LagrangianState &simulation,
   const int samples  = simulation.getSamples();
 
   forces.resizeLike(XY);
+  forces.array() = 0;
 
   // Rtree construction
   typedef std::pair<Vector2d, unsigned> value;
