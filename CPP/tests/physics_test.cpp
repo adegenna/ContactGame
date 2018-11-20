@@ -39,51 +39,42 @@ TEST_F(PhysicsTest, testBilliards) {
 
   Options options;
   options.inputfile  = std::string(SRCDIR)+"tests/billiards.csv";
-  options.outputfile = "billiardsfinal";
+  options.outputfile = "billiardsfinal_BruteForce";
   options.dt         = 0.001;
-  options.tsteps     = 20000;
+  options.tsteps     = 10000;
   options.tsave      = 500;
+
+  Options options_rtree;
+  options_rtree.inputfile  = std::string(SRCDIR)+"tests/billiards.csv";
+  options_rtree.outputfile = "billiardsfinal_rtree";
+  options_rtree.dt         = 0.001;
+  options_rtree.tsteps     = 10000;
+  options_rtree.tsave      = 500;
   
-  // Setup
+  // Setup models
   LagrangianState simulation(load_csv<MatrixXd>(options.inputfile));
-  ParticlePhysics physics(options, simulation);
+  ParticlePhysics physics(options, simulation, false);
   TimeIntegration integrator(options, physics, simulation);
+  
+  LagrangianState simulation_rtree(load_csv<MatrixXd>(options_rtree.inputfile));
+  ParticlePhysics physics_rtree(options_rtree, simulation_rtree, true);
+  TimeIntegration integrator_rtree(options_rtree, physics_rtree, simulation_rtree);
   
   // Solve
   integrator.euler();
+  integrator_rtree.euler();
 
   // Output
   simulation.writeXY(options.outputfile);
+  simulation_rtree.writeXY(options_rtree.outputfile);
   
   // Read the output
-  MatrixXd out;
+  MatrixXd out, out2;
   out   = load_csv<MatrixXd>(options.outputfile);
-  
+  out2  = load_csv<MatrixXd>(options_rtree.outputfile);
+
+  ASSERT_TRUE(out.isApprox(out2));
+
   
 }
 
-TEST_F(PhysicsTest, testParticleContact) {
-
-  Options options;
-  options.inputfile  = std::string(SRCDIR)+"tests/billiards.csv";
-  options.outputfile = "billiardsfinal";
-  options.dt         = 0.001;
-  options.tsteps     = 20000;
-  options.tsave      = 500;
-  
-  // Setup
-  LagrangianState simulation(load_csv<MatrixXd>(options.inputfile));
-  ParticlePhysics physics(options, simulation);
-  TimeIntegration integrator(options, physics, simulation);
-  
-  physics.zeroForces();
-  physics.particleContact();
-  const MatrixXd& forces1 = physics.getForces();
-  physics.zeroForces();
-  physics.particleContactRtree();
-  const MatrixXd& forces2 = physics.getForces();
-    
-  ASSERT_TRUE(forces1.isApprox(forces2));
-  
-  
-}

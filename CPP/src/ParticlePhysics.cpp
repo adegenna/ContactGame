@@ -43,44 +43,6 @@ ParticlePhysics::~ParticlePhysics() {
 }
 
 
-//void ParticlePhysics::particleContactRtree() {
-//  // Calculate all particle-particle contacts (N log N)
-//  const MatrixXd& XY = simulation_->getXY();
-//  const MatrixXd& UV = simulation_->getUV();
-//  const VectorXd& R  = simulation_->getR();
-//  // Rtree construction
-//  typedef std::pair<Vector2d, unsigned> value;
-//  bgi::rtree< value, bgi::quadratic<16> > rtree;
-//  for (int i=0; i<samples_; i++) {
-//    Vector2d xy; xy[0] = XY(i,0); xy[1] = XY(i,1);
-//    rtree.insert(std::make_pair(xy,i));
-//  }
-//  int maxN = std::min(samples_,6);
-//  // knn search
-//  double epsilon = 1e-8;
-//  initializeParticleInteractionTracker();
-//  for (int i=0; i<samples_; i++) {
-//    std::vector<value> result_n;
-//    Vector2d xy; xy[0] = XY(i,0); xy[1] = XY(i,1);
-//    rtree.query(bgi::nearest(xy,maxN), std::back_inserter(result_n));
-//    for (int j=0; j<maxN; j++) {
-//      const value& v      = result_n[j];
-//      int idx             = v.second;
-//      Vector2d dij; dij[0] = v.first[0]-XY(i,0); dij[1] = v.first[1]-XY(i,1);
-//      double distance_ij  = dij.norm();
-//      if ((interactions_(i,idx) == 0) && (interactions_(idx,i) == 0)) {
-//	double ui_tangent = UV.row(i).dot(dij)/distance_ij;
-//	double uj_tangent = UV.row(idx).dot(dij)/distance_ij;
-//	if ((ui_tangent - uj_tangent) > 0) {
-//	  modelContactForces(i,idx,dij);
-//	}
-//	interactions_(i,idx) = 1;
-//	interactions_(idx,i) = 1;
-//      }
-//    }
-//  }
-//}
-
 void ParticlePhysics::initializeParticleInteractionTracker() {
   interactions_ = MatrixXi::Zero(samples_,samples_);
 }
