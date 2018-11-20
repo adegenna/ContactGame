@@ -61,3 +61,29 @@ TEST_F(PhysicsTest, testBilliards) {
   
   
 }
+
+TEST_F(PhysicsTest, testParticleContact) {
+
+  Options options;
+  options.inputfile  = std::string(SRCDIR)+"tests/billiards.csv";
+  options.outputfile = "billiardsfinal";
+  options.dt         = 0.001;
+  options.tsteps     = 20000;
+  options.tsave      = 500;
+  
+  // Setup
+  LagrangianState simulation(load_csv<MatrixXd>(options.inputfile));
+  ParticlePhysics physics(options, simulation);
+  TimeIntegration integrator(options, physics, simulation);
+  
+  physics.zeroForces();
+  physics.particleContact();
+  const MatrixXd& forces1 = physics.getForces();
+  physics.zeroForces();
+  physics.particleContactRtree();
+  const MatrixXd& forces2 = physics.getForces();
+    
+  ASSERT_TRUE(forces1.isApprox(forces2));
+  
+  
+}

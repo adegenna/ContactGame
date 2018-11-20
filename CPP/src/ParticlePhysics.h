@@ -21,6 +21,7 @@ class ParticlePhysics {
   void zeroForces();
   void initializeParticleInteractionTracker();
   const Eigen::MatrixXd& RHS();
+  const Eigen::MatrixXd& getForces() const { return forces_; }
   
  private:
   const Options options_;

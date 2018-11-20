@@ -76,7 +76,7 @@ void ParticlePhysics::particleContactRtree() {
       int idx             = v.second;
       Vector2d dij; dij[0] = v.first[0]-XY(i,0); dij[1] = v.first[1]-XY(i,1);
       double distance_ij  = dij.norm();
-      if ((interactions_(i,idx) == 0) && (interactions_(idx,i) == 0)) {
+      if ((interactions_(i,idx) == 0) || (interactions_(idx,i) == 0)) {
 	double ui_tangent = UV.row(i).dot(dij)/distance_ij;
 	double uj_tangent = UV.row(idx).dot(dij)/distance_ij;
 	if ((ui_tangent - uj_tangent) > 0) {
