@@ -19,6 +19,8 @@ class ParticlePhysics {
   Eigen::VectorXd calculateTotalMomentum();
   void writeEnergyAndMomentum(double energy, Eigen::VectorXd& momentum, const std::string& filename) const;
   void zeroForces();
+  void initializeParticleInteractionTracker();
+  bool trackAllParticleInteractions(int i, int j);
   const Eigen::MatrixXd& RHS();
   
  private:
@@ -27,6 +29,7 @@ class ParticlePhysics {
   int samples_;
   Eigen::MatrixXd forces_;
   Eigen::VectorXd mass_;
+  Eigen::MatrixXi interactions_;
   
 };
 

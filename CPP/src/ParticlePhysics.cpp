@@ -67,6 +67,7 @@ void ParticlePhysics::particleContactRtree() {
   int maxN = std::min(samples_,6);
   // knn search
   double epsilon = 1e-8;
+  initializeParticleInteractionTracker();
   for (int i=0; i<samples_; i++) {
     std::vector<value> result_n;
     Vector2d xy; xy[0] = XY(i,0); xy[1] = XY(i,1);
@@ -76,16 +77,38 @@ void ParticlePhysics::particleContactRtree() {
       int idx             = v.second;
       Vector2d dij; dij[0] = v.first[0]-XY(i,0); dij[1] = v.first[1]-XY(i,1);
       double distance_ij  = dij.norm();
-      if ((distance_ij <= R(i)+R(idx)) && (distance_ij > epsilon) ) {
-	double ui_tangent = UV.row(i).dot(dij)/distance_ij;
-	double uj_tangent = UV.row(idx).dot(dij)/distance_ij;
-	if ((ui_tangent - uj_tangent) > 0) {
-	  modelContactForces(i,idx,dij);
+      bool flagStop       = trackAllParticleInteractions(i,idx);
+      if (flagStop == true)
+	break;
+      else {
+	if ( (distance_ij <= R(i)+R(idx)) && (distance_ij > epsilon) ) {
+	  double ui_tangent = UV.row(i).dot(dij)/distance_ij;
+	  double uj_tangent = UV.row(idx).dot(dij)/distance_ij;
+	  if ((ui_tangent - uj_tangent) > 0) {
+	    modelContactForces(i,idx,dij);
+	  }
 	}
       }
     }
   }
 
+}
+
+void ParticlePhysics::initializeParticleInteractionTracker() {
+  interactions_ = MatrixXi::Zero(samples_,samples_);
+  for (int i=0; i<samples_; i++) {
+    for (int j=i+1; j<samples_; j++) {
+      interactions_(i,j) = 1;
+    }
+  }
+}
+
+bool ParticlePhysics::trackAllParticleInteractions(int i, int j) {
+  interactions_(i,j) = 0;
+  if (interactions_.sum() < 1) 
+    return true;
+  else
+    return false;
 }
 
 
@@ -154,7 +177,7 @@ void ParticlePhysics::zeroForces() {
 
 const MatrixXd& ParticlePhysics::RHS() {
   zeroForces();
-  particleContact();
+  particleContactRtree();
   double diff   = 3.77;//0.7;
   for (int i=0; i<samples_; i++) {
     forces_(i,0) *= diff/mass_(i);
