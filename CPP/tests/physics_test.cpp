@@ -112,4 +112,36 @@ TEST(ContactForceModel, BruteForceEqualsRTree)
 }
 
 
+TEST(ContactForceModel, OverlappingInX)
+{
+  Eigen::MatrixXd state(2,5);
+  // stationary particle at 0,0 with radius 1
+  state(0,0) = 0;
+  state(0,1) = 0;
+  state(0,2) = 0;
+  state(0,3) = 0;
+  state(0,4) = 0.51;
+  // stationary particle at 1,0 with radius 1
+  state(1,0) = 1;
+  state(1,1) = 0;
+  state(1,2) = 0;
+  state(1,3) = 0;
+  state(1,4) = 0.51;
+
+  BruteForceContactForceModel brute_force_contact;
+  RTreeContactForceModel rtree_contact;
+  Eigen::MatrixXd forces_brute_force, forces_rtree;
+
+  brute_force_contact.particleContact(LagrangianState(state), forces_brute_force);
+  rtree_contact.particleContact(LagrangianState(state), forces_rtree);
+
+  std::cout << "brute force:\n" << forces_brute_force
+            << "\nrtree force:\n" << forces_rtree << "\n";
+
+  EXPECT_TRUE(forces_brute_force.isApprox(forces_rtree));
+
+  Eigen::MatrixXd zero2x2 = Eigen::MatrixXd::Zero(2,2);
+  EXPECT_FALSE(forces_brute_force.isApprox(zero2x2)) << "brute force should not be zero.";
+  EXPECT_FALSE(forces_rtree.isApprox(zero2x2)) << "rtree force should not be zero.";
+}
 
