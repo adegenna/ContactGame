@@ -4,6 +4,7 @@
 #include "../src/LagrangianState.h"
 #include "../src/ParticlePhysics.h"
 #include "../src/TimeIntegration.h"
+#include <sys/time.h>
 
 using namespace Eigen;
 
@@ -61,9 +62,21 @@ TEST_F(PhysicsTest, testBilliards) {
   TimeIntegration integrator_rtree(options_rtree, physics_rtree, simulation_rtree);
   
   // Solve
+  struct timeval start, end;
+  gettimeofday(&start, NULL);
   integrator.euler();
+  gettimeofday(&end, NULL);
+  double delta = ((end.tv_sec  - start.tv_sec) * 1000000u + 
+		  end.tv_usec - start.tv_usec) / 1.e6;
+  std::cout << "Brute force calculation: " << delta << " s" << std::endl;  
+  
+  gettimeofday(&start, NULL);
   integrator_rtree.euler();
-
+  gettimeofday(&end, NULL);
+  delta = ((end.tv_sec  - start.tv_sec) * 1000000u + 
+		  end.tv_usec - start.tv_usec) / 1.e6;  
+  std::cout << "Rtree calculation: " << delta << " s" << std::endl;
+  
   // Output
   simulation.writeXY(options.outputfile);
   simulation_rtree.writeXY(options_rtree.outputfile);
