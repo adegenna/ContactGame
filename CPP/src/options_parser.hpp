@@ -16,6 +16,7 @@ bool parseOptions(int argc, char *argv[], Options& options){
   desc.add_options()
     ("help", "produce help message")
     ("inputfile"        , po::value<std::string>(&options.inputfile) , "Set input filename")
+    ("inputfileBoundary", po::value<std::string>(&options.inputfileBoundary) , "Set input filename for boundaries")
     ("outputfile"       , po::value<std::string>(&options.outputfile) , "Set output filename")
     ("dt"               , po::value<double>(&options.dt) , "Set timestep")
     ("integrator"       , po::value<std::string>(&options.integrator) , "Set time integrator type")

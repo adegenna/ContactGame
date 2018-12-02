@@ -114,9 +114,6 @@ TEST(ContactForceModel, OverlappingStationaryParticlesHaveZeroForce)
   brute_force_contact.particleContact(LagrangianState(state), forces_brute_force);
   rtree_contact.particleContact(LagrangianState(state), forces_rtree);
 
-  std::cout << "brute force:\n" << forces_brute_force
-            << "\nrtree force:\n" << forces_rtree << "\n";
-
   EXPECT_TRUE(forces_brute_force.isApprox(forces_rtree));
   
   Eigen::MatrixXd zero2x2 = Eigen::MatrixXd::Zero(2,2);
@@ -148,9 +145,6 @@ TEST(ContactForceModel, OverlappingInX)
   brute_force_contact.particleContact(LagrangianState(state), forces_brute_force);
   rtree_contact.particleContact(LagrangianState(state), forces_rtree);
 
-  std::cout << "brute force:\n" << forces_brute_force
-            << "\nrtree force:\n" << forces_rtree << "\n";
-
   EXPECT_TRUE(forces_brute_force.isApprox(forces_rtree));
 
   Eigen::MatrixXd zero2x2 = Eigen::MatrixXd::Zero(2,2);
@@ -158,8 +152,8 @@ TEST(ContactForceModel, OverlappingInX)
   EXPECT_FALSE(forces_rtree.isApprox(zero2x2)) << "rtree force should not be zero.";
 
   Eigen::MatrixXd expected(2,2);
-  expected(0,0) = -286.622;
-  expected(1,0) = 286.622;
+  expected(0,0) = -286.622*3.77;
+  expected(1,0) = 286.622*3.77;
   expected(0,1) = 0;
   expected(1,1) = 0;
 
@@ -167,3 +161,33 @@ TEST(ContactForceModel, OverlappingInX)
   EXPECT_TRUE(forces_rtree.isApprox(expected, 0.1));
 }
 
+
+TEST_F(PhysicsTest, testBoundaries) {
+
+  Options options;
+  options.inputfile  = std::string(SRCDIR)+"tests/billiards.csv";
+  options.inputfileBoundary = std::string(SRCDIR)+"tests/billiardsBoundary.csv";
+  options.outputfile = "billiardsfinal_BruteForce";
+  options.dt         = 0.001;
+  options.tsteps     = 10000;
+  options.tsave      = 500;
+  
+  // Setup models
+  LagrangianState simulation(load_csv<MatrixXd>(options.inputfile));
+  LagrangianState boundaries(load_csv<MatrixXd>(options.inputfileBoundary));
+  ParticlePhysics physics(options, simulation, boundaries, false);
+  TimeIntegration integrator(options, physics, simulation);
+    
+  // Solve
+  struct timeval start, end;
+  gettimeofday(&start, NULL);
+  integrator.euler();
+  gettimeofday(&end, NULL);
+  double delta = ((end.tv_sec  - start.tv_sec) * 1000000u + 
+		  end.tv_usec - start.tv_usec) / 1.e6;
+  std::cout << "Brute force calculation: " << delta << " s" << std::endl;  
+  
+  // Output
+  simulation.writeXY(options.outputfile);
+  
+}

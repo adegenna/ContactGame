@@ -25,7 +25,8 @@ protected:
         double delta = std::min( std::abs((R(i)+R(j))-distance_ij) , eps*(R(i)+R(j)) );
         double F     = pow(10.0,5.0)*pow(delta,0.85);
         Eigen::VectorXd eij = dij/distance_ij;
-        return Eigen::Vector2d(F*eij(0), F*eij(1));
+	double diff  = 3.77; //0.7;
+        return Eigen::Vector2d(diff*F*eij(0), diff*F*eij(1));
     }
 };
 
@@ -48,6 +49,7 @@ class ParticlePhysics {
  public:
 
   ParticlePhysics(Options& options, LagrangianState& simulation, bool useRtree = false);
+  ParticlePhysics(Options& options, LagrangianState& simulation, LagrangianState& boundaryParticles, bool useRtree = false);
   ~ParticlePhysics();
 //  void particleContactRtree();
   void calculateParticleMasses();
@@ -62,6 +64,7 @@ class ParticlePhysics {
  private:
   const Options options_;
   LagrangianState* simulation_;
+  LagrangianState* boundaryParticles_;
   int samples_;
   std::unique_ptr<ContactForceModel> contact_model_;
   Eigen::MatrixXd forces_;

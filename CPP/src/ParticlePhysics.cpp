@@ -38,6 +38,18 @@ ParticlePhysics::ParticlePhysics(Options& o, LagrangianState& simulation, bool u
   calculateParticleMasses();
 }
 
+ParticlePhysics::ParticlePhysics(Options& o, LagrangianState& simulation, LagrangianState& boundaryParticles, bool useRtree)
+  : options_(o), simulation_(&simulation), boundaryParticles_(&boundaryParticles)
+{
+  samples_ = simulation_->getSamples();
+  if (useRtree){
+    contact_model_ = std::make_unique<RTreeContactForceModel>();
+  } else {
+    contact_model_ = std::make_unique<BruteForceContactForceModel>();
+  }
+  calculateParticleMasses();
+}
+
 ParticlePhysics::~ParticlePhysics() {
   
 }
@@ -182,12 +194,10 @@ void ParticlePhysics::zeroForces() {
 
 const MatrixXd& ParticlePhysics::RHS() {
   zeroForces();
-//  particleContactRtree();
   contact_model_->particleContact(*simulation_, forces_);
-  double diff   = 3.77;//0.7;
   for (int i=0; i<samples_; i++) {
-    forces_(i,0) *= diff/mass_(i);
-    forces_(i,1) *= diff/mass_(i);
+    forces_(i,0) /= mass_(i);
+    forces_(i,1) /= mass_(i);
   }
   return forces_;
   
