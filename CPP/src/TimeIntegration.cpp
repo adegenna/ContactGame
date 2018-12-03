@@ -23,6 +23,11 @@ TimeIntegration::TimeIntegration(Options& options, ParticlePhysics& physics, Lag
 {
 }
 
+TimeIntegration::TimeIntegration(Options& options, ParticlePhysics& physics, LagrangianState& state, LagrangianState& boundary)
+  : options_(options), physics_(&physics), state_(&state), boundary_(&boundary)
+{
+}
+
 TimeIntegration::~TimeIntegration() {
   
 }
@@ -30,7 +35,7 @@ TimeIntegration::~TimeIntegration() {
 void TimeIntegration::euler() {
   MatrixXd DUV, DXY;
   for (int i=0; i<options_.tsteps; i++) {
-    // Calculate x_tt = RHS
+    // Calculate particle interactions: x_tt = RHS
     const MatrixXd& rhs = physics_->RHS();
     DUV = rhs*options_.dt;
     state_->incrementUV(DUV);

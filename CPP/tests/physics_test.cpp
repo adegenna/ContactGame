@@ -167,7 +167,7 @@ TEST_F(PhysicsTest, testBoundaries) {
   Options options;
   options.inputfile  = std::string(SRCDIR)+"tests/billiards.csv";
   options.inputfileBoundary = std::string(SRCDIR)+"tests/billiardsBoundary.csv";
-  options.outputfile = "billiardsfinal_BruteForce";
+  options.outputfile = "billiardsfinal_BruteForce_boundary";
   options.dt         = 0.001;
   options.tsteps     = 10000;
   options.tsave      = 500;

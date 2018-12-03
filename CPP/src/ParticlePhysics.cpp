@@ -27,7 +27,7 @@ namespace bgi = boost::geometry::index;
 BOOST_GEOMETRY_REGISTER_POINT_2D(Eigen::Vector2d, double, boost::geometry::cs::cartesian, Eigen::Vector2d::x(), Eigen::Vector2d::y())
 
 ParticlePhysics::ParticlePhysics(Options& o, LagrangianState& simulation, bool useRtree)
-  : options_(o), simulation_(&simulation)
+: options_(o), simulation_(&simulation), boundaryParticles_(NULL)
 {
   samples_ = simulation_->getSamples();
   if (useRtree){
@@ -64,9 +64,9 @@ void ParticlePhysics::initializeParticleInteractionTracker() {
 void
 BruteForceContactForceModel::
 particleContact(const LagrangianState &simulation,
-                Eigen::MatrixXd &forces)
+		Eigen::MatrixXd& forces)
 {
-  // Calculate all particle-particle contacts (N^2 brute force)
+  // Calculate all particle-wall contacts (N^2 brute force)
   const MatrixXd& XY = simulation.getXY();
   const MatrixXd& UV = simulation.getUV();
   const VectorXd& R  = simulation.getR();
@@ -84,7 +84,7 @@ particleContact(const LagrangianState &simulation,
         double ui_tangent = UV.row(i).dot(dij)/distance_ij;
         double uj_tangent = UV.row(j).dot(dij)/distance_ij;
         if ((ui_tangent - uj_tangent) > 0) {
-          const auto local_force = modelContactForces(i,j,dij,simulation);
+          const auto local_force = modelContactForces(R(i),R(j),dij,simulation);
 
           forces(i,0) -= local_force(0);
           forces(i,1) -= local_force(1);
@@ -94,6 +94,41 @@ particleContact(const LagrangianState &simulation,
       }
     }
   }
+}
+
+void
+BruteForceContactForceModel::
+particleWallContact(const LagrangianState& simulation,
+		    const LagrangianState& boundary,
+		    Eigen::MatrixXd& forces)
+{
+  // Calculate all particle-particle contacts (N^2 brute force)
+  const MatrixXd& XY   = simulation.getXY();
+  const MatrixXd& UV   = simulation.getUV();
+  const VectorXd& R    = simulation.getR();
+  const int Nparticles = simulation.getSamples();
+  const MatrixXd& XYb  = boundary.getXY();
+  const MatrixXd& UVb  = boundary.getUV();
+  const VectorXd& Rb   = boundary.getR();
+  const int Nboundary  = boundary.getSamples();  
+  
+# pragma omp parallel for
+  for (int i=0; i<Nparticles; i++) {
+    for (int j=0; j<Nboundary; j++) {
+      Vector2d dij        = XYb.row(j)-XY.row(i);
+      double distance_ij  = dij.norm();
+      if (distance_ij <= R(i)+Rb(j)) {
+        double ui_tangent = UV.row(i).dot(dij)/distance_ij;
+        double uj_tangent = UV.row(j).dot(dij)/distance_ij;
+        if ((ui_tangent - uj_tangent) > 0) {
+	  const auto local_force = modelContactForces(R(i),Rb(j),dij,simulation);
+
+          forces(i,0) -= local_force(0);
+          forces(i,1) -= local_force(1);
+        }
+      }
+    }
+  }  
 }
 
 
@@ -139,7 +174,7 @@ particleContact(const LagrangianState &simulation,
       const double uj_tangent  = UV.row(idx).dot(dij)/distance_ij;
 
       if (((ui_tangent - uj_tangent) > 0) && idx > i) {
-        const auto local_force = modelContactForces(i,idx,dij,simulation);
+        const auto local_force = modelContactForces(R(i),R(idx),dij,simulation);
 
         forces(i,0)   -= local_force(0);
         forces(i,1)   -= local_force(1);
@@ -148,6 +183,15 @@ particleContact(const LagrangianState &simulation,
       }
     }
   }
+}
+
+void
+RTreeContactForceModel::
+particleWallContact(const LagrangianState& simulation,
+		    const LagrangianState& boundary,
+		    Eigen::MatrixXd& forces)
+{
+  return;
 }
 
 
@@ -195,6 +239,9 @@ void ParticlePhysics::zeroForces() {
 const MatrixXd& ParticlePhysics::RHS() {
   zeroForces();
   contact_model_->particleContact(*simulation_, forces_);
+  if (boundaryParticles_ != NULL) {
+    contact_model_->particleWallContact(*simulation_, *boundaryParticles_, forces_);
+  }
   for (int i=0; i<samples_; i++) {
     forces_(i,0) /= mass_(i);
     forces_(i,1) /= mass_(i);

@@ -10,6 +10,7 @@ class TimeIntegration {
 
  public:
   TimeIntegration(Options& options, ParticlePhysics& physics, LagrangianState& state);
+  TimeIntegration(Options& options, ParticlePhysics& physics, LagrangianState& state, LagrangianState& boundary);
   ~TimeIntegration();
   void euler();
   
@@ -17,6 +18,7 @@ class TimeIntegration {
   const Options options_;
   ParticlePhysics* physics_;
   LagrangianState* state_;
+  LagrangianState* boundary_;
   
 };
 

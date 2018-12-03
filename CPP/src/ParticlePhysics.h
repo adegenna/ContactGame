@@ -12,17 +12,19 @@ class ContactForceModel{
 public:
     virtual void particleContact(const LagrangianState& simulation,
                                  Eigen::MatrixXd& forces) = 0;
+    virtual void particleWallContact(const LagrangianState& simulation,
+				     const LagrangianState& boundary,
+				     Eigen::MatrixXd& forces) = 0;
 
 protected:
-    Eigen::Vector2d modelContactForces(int i,
-                                       int j,
+    Eigen::Vector2d modelContactForces(double Ri,
+                                       double Rj,
                                        const Eigen::Vector2d& dij,
                                        const LagrangianState& simulation) const
     {
         double distance_ij = dij.norm();
         double eps         = 0.001;
-        const Eigen::VectorXd& R  = simulation.getR();
-        double delta = std::min( std::abs((R(i)+R(j))-distance_ij) , eps*(R(i)+R(j)) );
+        double delta = std::min( std::abs((Ri+Rj)-distance_ij) , eps*(Ri+Rj) );
         double F     = pow(10.0,5.0)*pow(delta,0.85);
         Eigen::VectorXd eij = dij/distance_ij;
 	double diff  = 3.77; //0.7;
@@ -34,15 +36,19 @@ class BruteForceContactForceModel : public ContactForceModel {
 public:
     void particleContact(const LagrangianState &simulation,
                          Eigen::MatrixXd &forces) override;
+    void particleWallContact(const LagrangianState& simulation,
+			     const LagrangianState& boundary,
+			     Eigen::MatrixXd& forces) override;
 };
 
 class RTreeContactForceModel : public ContactForceModel {
 public:
     void particleContact(const LagrangianState &simulation,
                          Eigen::MatrixXd &forces) override;
+    void particleWallContact(const LagrangianState& simulation,
+			     const LagrangianState& boundary,
+			     Eigen::MatrixXd& forces) override;
 };
-
-
 
 class ParticlePhysics {
 
