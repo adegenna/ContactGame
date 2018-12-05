@@ -37,6 +37,7 @@ add_executable( testall
   src/LagrangianState.cpp
   src/ParticlePhysics.cpp
   src/TimeIntegration.cpp
+  src/Quadtree/Bucket.cpp
   tests/inputs_test.cpp
   tests/lagrangian_test.cpp
   tests/physics_test.cpp

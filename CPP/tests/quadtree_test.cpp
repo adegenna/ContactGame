@@ -6,12 +6,15 @@
 #include <boost/geometry/geometries/register/point.hpp>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <boost/foreach.hpp>
+#include <random>
 #include "quadtree_test.h"
 #include "../src/Inputfile.hpp"
 #include "../src/LagrangianState.h"
 #include "../src/ParticlePhysics.h"
 #include "../src/TimeIntegration.h"
+#include "../src/Quadtree/Bucket.h"
 
 using namespace Eigen;
 namespace bg = boost::geometry;
@@ -60,6 +63,63 @@ TEST_F(QuadtreeTest, testQuadtreeEigen) {
   value act = std::make_pair(xy,0);
   
   ASSERT_TRUE(result_n[0].first.isApprox(xy));
+  
+}
+
+TEST_F(QuadtreeTest, testQuadtreeCustom) {
+  
+  Options options;
+  options.inputfile  = std::string(SRCDIR)+"tests/billiards.csv";
+  options.outputfile = "final.csv";
+  options.dt         = 0.1;
+  options.tsteps     = 10;
+  options.tsave      = 20;
+  const std::string outdir = std::string(SRCDIR)+"build";
+  
+  // Initialize first bucket
+  double SW[2] = {0.,0.};
+  double SE[2] = {1.,0.};
+  double NW[2] = {0.,1.};
+  double NE[2] = {1.,1.};
+  Bucket* QT = new Bucket(&SW[0],&SE[0],&NW[0],&NE[0]);
+  QT->setOutDir(outdir);
+  
+  // Test set/get points
+  const int nrolls=1000;  // number of experiments
+
+  std::default_random_engine generator;
+  std::normal_distribution<double> distX(0.3,.1);
+  std::normal_distribution<double> distY(0.4,0.2);
+  FILE* fout = fopen("../build/DataSet.dat","w");
+  
+  double sampsX[nrolls];
+  double sampsY[nrolls];
+  for (int i=0; i<nrolls; i++) {
+    double nx = distX(generator);
+    double ny = distY(generator);
+    sampsX[i] = nx;
+    sampsY[i] = ny;   
+    fprintf(fout,"%f\t%f\n",nx,ny);
+  }
+
+  // Divide buckets
+  QT->calcQuadTree(&sampsX[0],&sampsY[0],nrolls);
+
+  // Search for a query point
+  double Xq = 0.41;
+  double Yq = 0.5;
+  double Xnn, Ynn;
+  int indnn;
+  QT->knnSearch(&Xq,&Yq,&Xnn,&Ynn,&indnn);
+  
+  printf("Xq = %f, Yq = %f\nXnn = %f, Ynn = %f\n",Xq,Yq,Xnn,Ynn);
+  
+  // Delete allocated memory
+  delete QT;
+  fclose(fout);
+
+  EXPECT_TRUE(std::abs(Xq-Xnn) < 0.1);
+  EXPECT_TRUE(std::abs(Yq-Ynn) < 0.1);
   
 }
 
