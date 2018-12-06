@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <cmath>
 #include <algorithm>
+#include <Eigen/Dense>
 
 using namespace std;
 
@@ -255,7 +256,7 @@ bool Bucket::calcInBucket(double* Xq, double* Yq) {
   return flag;
 }
 
-void Bucket::knnSearch(double* Xq, double* Yq, double* Xnn, double* Ynn, int* indnn) {
+void Bucket::nnSearch(double* Xq, double* Yq, double* Xnn, double* Ynn, int* indnn) {
   // Function that takes a query point and finds the nearest 
   // neighbor in the data set of the quadtree
 
@@ -312,6 +313,53 @@ void Bucket::knnSearch(double* Xq, double* Yq, double* Xnn, double* Ynn, int* in
 
   delete[] dist;
 
+}
+
+void Bucket::knnSearch(double* Xq, double* Yq, Eigen::MatrixXd& xyi) {
+  // Function that takes a query point and finds the nearest 
+  // neighbor in the data set of the quadtree
+
+  bool flagFinal = false;
+  bool flagChild = false;
+  bool flagHasPts;
+  Bucket* current = this;
+  int iter;
+  // Iteratively search down the tree
+  while(flagFinal==false) {
+    // Determine if current bucket has child iter
+    iter = -1;
+    while((flagChild==false) && (iter<3)) {
+      iter++;
+      if (current->buckets_[iter] != NULL) {
+        // If child iter exists, search it and make sure there are pts inside it
+        flagChild = current->buckets_[iter]->calcInBucket(Xq,Yq);
+        flagHasPts = current->buckets_[iter]->NumPts_ > 0;
+      }
+    }
+    // If we have found a valid child containing (Xq,Yq), reset current
+    if ((flagChild==true) && (flagHasPts==true)) {
+      current = current->buckets_[iter];
+      flagChild = false;
+    }
+    // Otherwise, we are done
+    else {
+      flagFinal = true;
+    }
+
+  }
+
+  // Calculate nearest neighbor inside bucket
+  int BS = BucketSize_;
+  vector<double> x;
+  vector<double> y;
+  vector<int> ind;
+  current->getPoints(&x,&y,&ind);
+  xyi.resize(x.size(),3);
+  for (int i=0; i<xyi.rows(); i++) {
+    xyi(i,0) = x[i];
+    xyi(i,1) = y[i];
+    xyi(i,2) = ind[i];
+  }
 }
 
 void Bucket::setOutDir(const std::string workDir) {

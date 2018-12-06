@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <Eigen/Dense>
 
 class Bucket {
  public:
@@ -22,7 +23,8 @@ class Bucket {
   void setBucketSize(int BS);
   void divideBucket();
   void calcQuadTree(double* dataX, double* dataY, int NumPts);
-  void knnSearch(double* Xq, double* Yq, double* Xnn, double* Ynn, int* indnn);
+  void nnSearch(double* Xq, double* Yq, double* Xnn, double* Ynn, int* indnn);
+  void knnSearch(double* Xq, double* Yq, Eigen::MatrixXd& xyi);
   void setOutDir(const std::string workDir);
 
  private:

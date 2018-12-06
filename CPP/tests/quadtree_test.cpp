@@ -110,9 +110,13 @@ TEST_F(QuadtreeTest, testQuadtreeCustom) {
   double Yq = 0.5;
   double Xnn, Ynn;
   int indnn;
-  QT->knnSearch(&Xq,&Yq,&Xnn,&Ynn,&indnn);
+  Eigen::MatrixXd xyi;
+  QT->nnSearch(&Xq,&Yq,&Xnn,&Ynn,&indnn);
+  QT->knnSearch(&Xq,&Yq,xyi);
   
   printf("Xq = %f, Yq = %f\nXnn = %f, Ynn = %f\n",Xq,Yq,Xnn,Ynn);
+  std::cout << "K-nearest neighbors: " << std::endl;
+  std::cout << xyi;
   
   // Delete allocated memory
   delete QT;
