@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-levels = 15
+levels = 25
 X      = np.zeros([levels*(levels+1)/2 + 1 , 5]);
 R      = 1.0;
 count  = 0;
@@ -17,3 +17,14 @@ X[-1,1] = -4*R;
 X[-1,3] = 1.0;
 
 np.savetxt('billiards.csv',X,delimiter=',');
+
+# boundaries
+nbound = 41
+R      = 1.0
+Xbound = np.zeros([nbound,5])
+Xbound[:,-1] = R
+for i in range(nbound):
+    Xbound[i,0] = -(nbound-1) + i*2
+    Xbound[i,1] = 48
+
+np.savetxt('billiardsBoundary.csv',Xbound,delimiter=',')

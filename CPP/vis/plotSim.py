@@ -26,8 +26,8 @@ for i in range(NT):
     for j in range(xyw.shape[0]):
         plt.plot(xcirc + xyw[j,0] , ycirc + xyw[j,1] , 'r');
     plt.gca().set_aspect('equal');
-    plt.xlim([-20,20])
-    plt.ylim([-4,36])
+    plt.xlim([-40,40])
+    plt.ylim([-4,76])
     fig.canvas.draw()
     time.sleep(0.01)
     plt.clf()
